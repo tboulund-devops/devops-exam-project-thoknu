@@ -22,8 +22,15 @@ namespace TaskKing.Api.Services
 
         public async Task<TaskItem> CreateTask(TaskItem task)
         {
+            if (task == null)
+                throw new ArgumentException("Task cannot be null");
+
+            if (string.IsNullOrWhiteSpace(task.Title))
+                throw new ArgumentException("Title is required");
+
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
+
             return task;
         }
     }
