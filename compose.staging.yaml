@@ -1,6 +1,6 @@
 ﻿services:
   web:
-    image: ghcr.io/tboulund-devops/devops-exam-project-thoknu:staging
+    image: ghcr.io/${{ github.repository_owner }}/taskking-api:staging
     ports:
       - "8000:8080"
     depends_on:
@@ -8,6 +8,8 @@
 
   mariadb:
     image: mariadb:latest
+    volumes:
+      - mariadb_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: taskking
@@ -28,3 +30,6 @@
       FLYWAY_USER: taskking
       FLYWAY_PASSWORD: taskking
     restart: "no"
+    
+volumes:
+  mariadb_data:
