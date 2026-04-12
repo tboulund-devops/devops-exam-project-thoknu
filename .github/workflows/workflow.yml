@@ -48,7 +48,7 @@ jobs:
       - name: Build image (staging)
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/taskking-api:staging \
+            -t ghcr.io/${{ github.repository_owner }}/devops-exam-project-thoknu:staging \
             -f server/TaskKing.Api/Dockerfile \
             server
 
@@ -60,7 +60,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push image
-        run: docker push ghcr.io/${{ github.repository_owner }}/taskking-api:staging
+        run: docker push ghcr.io/${{ github.repository_owner }}/devops-exam-project-thoknu:staging
 
       - name: Copy compose + migrations to staging
         uses: appleboy/scp-action@v0.1.7
@@ -94,7 +94,7 @@ jobs:
       - name: Build image (prod)
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/taskking-api:${{ needs.build_test.outputs.version }} \
+            -t ghcr.io/${{ github.repository_owner }}/devops-exam-project-thoknu:${{ needs.build_test.outputs.version }} \
             -f server/TaskKing.Api/Dockerfile \
             server
 
@@ -106,7 +106,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push image
-        run: docker push ghcr.io/${{ github.repository_owner }}/taskking-api:${{ needs.build_test.outputs.version }}
+        run: docker push ghcr.io/${{ github.repository_owner }}/devops-exam-project-thoknu:${{ needs.build_test.outputs.version }}
 
       - name: Copy compose + migrations to production
         uses: appleboy/scp-action@v0.1.7

@@ -1,6 +1,6 @@
 ﻿services:
   web:
-    image: ghcr.io/${{ github.repository_owner }}/taskking-api:staging
+    image: ghcr.io/tboulund-devops/devops-exam-project-thoknu:staging
     ports:
       - "8000:8080"
     depends_on:
