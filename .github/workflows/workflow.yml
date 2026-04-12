@@ -9,6 +9,9 @@ on:
 jobs:
   build_test:
     runs-on: ubuntu-latest
+    
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4
@@ -65,9 +68,7 @@ jobs:
           host: ${{ secrets.STAGING_SERVER_IP }}
           username: ${{ secrets.STAGING_SERVER_USERNAME }}
           key: ${{ secrets.STAGING_SERVER_SSH_KEY }}
-          source: |
-            compose.staging.yaml
-            db/migrations
+          source: "compose.staging.yaml,db/migrations/V1__init.sql"
           target: app/
 
       - name: Deploy to staging
@@ -93,7 +94,7 @@ jobs:
       - name: Build image (prod)
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/taskking-api:${{ github.sha }} \
+            -t ghcr.io/${{ github.repository_owner }}/taskking-api:${{ needs.build_test.outputs.version }} \
             -f server/TaskKing.Api/Dockerfile \
             server
 
@@ -105,7 +106,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push image
-        run: docker push ghcr.io/${{ github.repository_owner }}/taskking-api:${{ github.sha }}
+        run: docker push ghcr.io/${{ github.repository_owner }}/taskking-api:${{ needs.build_test.outputs.version }}
 
       - name: Copy compose + migrations to production
         uses: appleboy/scp-action@v0.1.7
@@ -113,9 +114,7 @@ jobs:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          source: |
-            compose.prod.yaml
-            db/migrations
+          source: "compose.prod.yaml,db/migrations/V1__init.sql"
           target: app/
 
       - name: Deploy to production
@@ -126,5 +125,6 @@ jobs:
           key: ${{ secrets.PROD_SERVER_SSH_KEY }}
           script: |
             cd app
+            VERSION=${{ needs.build_test.outputs.version }}
             docker compose -f compose.prod.yaml pull
             docker compose -f compose.prod.yaml up -d

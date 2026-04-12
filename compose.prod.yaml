@@ -1,6 +1,6 @@
 ﻿services:
   web:
-    image: ghcr.io/tboulund-devops/devops-exam-project-thoknu:latest
+    image: ghcr.io/tboulund-devops/devops-exam-project-thoknu:${VERSION}
     ports:
       - "80:8080"
     depends_on:
