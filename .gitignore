@@ -1,0 +1,48 @@
+﻿# Visual Studio / Rider files
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+out/
+
+# Rider / JetBrains
+*.iml
+/.idea/
+.idea_modules/
+
+# .NET Core
+*.dll
+*.pdb
+*.exe
+*.log
+*.vs/
+*.dbmdl
+*.dbproj.schemaview
+*.dbproj.user
+TestResults/
+*.dotCover
+*.ncrunch*
+*.ReSharper.*
+*.DotSettings.user
+
+# ASP.NET
+wwwroot/node_modules/
+wwwroot/lib/
+
+# Local secrets
+.env
+
+# GitHub Actions temporary files
+coverage-report/
+StrykerOutput/
+
+# NuGet
+*.nupkg
+packages/
+.nuget/

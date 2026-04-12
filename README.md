@@ -1,86 +1,104 @@
-# [...]
+# Task King – Task Management
 
-> [!NOTE]
-> Provide a project title in the heading above. Just below this note write a short description of the application you plan to build.
+## Description
+Task management system allowing creating, organizing, and tracking tasks.
 
-[...]
+---
 
 ## Tech-stack
+- Backend: .NET Web API
+- Frontend: Static HTML/JS via wwwroot
+- Database: MariaDB with Flyway versioning
+- ORM: Entity Framework Core (Npgsql)
 
-> [!NOTE]
-> Write a short description of your tech-stack here in terms of programming language(s) and database engine(s).
-
-[...]
+---
 
 ## Architecture
+A simple 3-layer architecture:
 
-> [!NOTE]
-> Write a short explanation of your planned architecture here.
+- Presentation layer: Static HTML/JS served from `wwwroot`
+- Application layer: Services handling business logic
+- Data layer: EF Core with PostgreSQL
 
-[...]
+Structure:
+Controllers → Services → DbContext
+
+---
 
 ## Feature plan
 
-> [!NOTE]
-> For each week below write a short description of the features you plan to build for your project this week.
-
-[...]
-
 ### Week 5
-*Kick-off week - no features to be planned here*
+Kick-off week - no features to be planned here
+
+---
 
 ### Week 6
-**Feature 1:** [...]
+- Feature 1: Create tasks
+- Feature 2: View all tasks
 
-**Feature 2:** [...]
+---
 
 ### Week 7
-*Winter vacation - nothing planned.*
+Winter vacation - nothing planned.
+
+---
 
 ### Week 8
-**Feature 1:** [...]
+- Feature 1: Update tasks
+- Feature 2: Delete tasks
 
-**Feature 2:** [...]
+---
 
 ### Week 9
-**Feature 1:** [...]
+- Feature 1: Add status to tasks (Todo, In Progress, Done)
+- Feature 2: Filter tasks by status
 
-**Feature 2:** [...]
+---
 
 ### Week 10
-**Feature 1:** [...]
+- Feature 1: Add priority (Low, Medium, High)
+- Feature 2: Sort tasks by priority or creation date
 
-**Feature 2:** [...]
+---
 
 ### Week 11
-**Feature 1:** [...]
+- Feature 1: Categories (create categories)
+- Feature 2: Assign tasks to categories
 
-**Feature 2:** [...]
+---
 
 ### Week 12
-**Feature 1:** [...]
+- Feature 1: Due dates
+- Feature 2: Show overdue tasks
 
-**Feature 2:** [...]
+---
 
 ### Week 13
-**Feature 1:** [...]
+- Feature 1: Comments on tasks
+- Feature 2: List comments per task
 
-**Feature 2:** [...]
+---
 
 ### Week 14
-*Easter vacation - nothing planned.*
+Easter vacation - nothing planned.
+
+---
 
 ### Week 15
-**Feature 1:** [...]
+- Feature 1: Search tasks (by title/description)
+- Feature 2: Pagination for task list
 
-**Feature 2:** [...]
+---
 
 ### Week 16
-**Feature 1:** [...]
+- Feature 1: Tag system (many-to-many with tasks)
+- Feature 2: Filter by tags
 
-**Feature 2:** [...]
+---
 
 ### Week 17
-**Feature 1:** [...]
+- Feature 1: Activity log (track changes to tasks)**
+- Feature 2: Export tasks (CSV)**
+- **Not sure if I get to this week.**
 
-**Feature 2:** [...]
+---

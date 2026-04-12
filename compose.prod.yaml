@@ -1,0 +1,28 @@
+﻿services:
+  web:
+    image: ghcr.io/tboulund-devops/devops-exam-project-thoknu:latest
+    ports:
+      - "80:8080"
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: taskking
+      MYSQL_USER: taskking
+      MYSQL_PASSWORD: taskking
+
+  flyway:
+    image: flyway/flyway:latest
+    depends_on:
+      - mariadb
+    volumes:
+      - ./db/migrations:/flyway/sql
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:mariadb://mariadb:3306/taskking
+      FLYWAY_USER: taskking
+      FLYWAY_PASSWORD: taskking
+    restart: "no"

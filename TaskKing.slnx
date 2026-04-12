@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/server/">
+    <Project Path="server/TaskKing.Api/TaskKing.Api.csproj" />
+  </Folder>
+  <Project Path="TaskKing.Tests/TaskKing.Tests.csproj" />
+</Solution>

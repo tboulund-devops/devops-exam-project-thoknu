@@ -1,0 +1,7 @@
+﻿CREATE TABLE TaskItem (
+      Id INT AUTO_INCREMENT PRIMARY KEY,
+      Title VARCHAR(255) NOT NULL,
+      Description TEXT NULL,
+      CreatedAt DATETIME NOT NULL,
+      Status VARCHAR(50) NOT NULL DEFAULT 'Todo'
+);

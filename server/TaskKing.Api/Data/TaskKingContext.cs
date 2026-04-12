@@ -1,0 +1,15 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TaskKing.Api.Models;
+
+namespace TaskKing.Api.Data
+{
+    public class TaskKingDbContext : DbContext
+    {
+        public TaskKingDbContext(DbContextOptions<TaskKingDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<TaskItem> Tasks { get; set; }
+    }
+}

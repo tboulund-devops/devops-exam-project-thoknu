@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task King</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+        form { margin-top: 20px; }
+        input { padding: 5px; width: 200px; }
+        button { padding: 5px 10px; }
+    </style>
+</head>
+<body>
+<h1>Task King</h1>
+
+<ul id="tasks"></ul>
+
+<form id="taskForm">
+    <input type="text" id="taskTitle" placeholder="Task title" required />
+    <button type="submit">Add Task</button>
+</form>
+
+<script>
+    async function loadTasks() {
+        try {
+            const response = await fetch('/api/tasks');
+            const tasks = await response.json();
+            const list = document.getElementById('tasks');
+            list.innerHTML = '';
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.textContent = `${task.id}: ${task.title} [${task.status}]`;
+                list.appendChild(li);
+            });
+        } catch (err) {
+            console.error('Error loading tasks:', err);
+        }
+    }
+
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const titleInput = document.getElementById('taskTitle');
+        const title = titleInput.value.trim();
+        if (!title) return;
+
+        try {
+            await fetch('/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title })
+            });
+            titleInput.value = '';
+            loadTasks();
+        } catch (err) {
+            console.error('Error creating task:', err);
+        }
+    });
+
+    loadTasks();
+</script>
+</body>
+</html>
