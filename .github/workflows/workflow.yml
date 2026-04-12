@@ -45,6 +45,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Login GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
+
       - name: Build image (staging)
         run: |
           docker build \
@@ -73,9 +76,7 @@ jobs:
           script: |
             cd app
 
-            echo "${{ secrets.STAGING_GHCR_READ_TOKEN }}" | docker login ghcr.io \
-              -u thoknu \
-              --password-stdin
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
             docker compose -f compose.staging.yaml pull
             docker compose -f compose.staging.yaml up -d
@@ -88,6 +89,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Login GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
       - name: Build image (prod)
         run: |
@@ -117,9 +121,7 @@ jobs:
           script: |
             cd app
 
-            echo "${{ secrets.PROD_GHCR_READ_TOKEN }}" | docker login ghcr.io \
-              -u thoknu \
-              --password-stdin
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
             docker compose -f compose.prod.yaml pull
             docker compose -f compose.prod.yaml up -d
