@@ -7,15 +7,16 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["server/TaskKing.Api/TaskKing.Api.csproj", "server/TaskKing.Api/"]
-RUN dotnet restore "server/TaskKing.Api/TaskKing.Api.csproj"
+
+COPY ["TaskKing.Api/TaskKing.Api.csproj", "TaskKing.Api/"]
+RUN dotnet restore "TaskKing.Api/TaskKing.Api.csproj"
+
 COPY . .
-WORKDIR "/src/server/TaskKing.Api"
+WORKDIR "/src/TaskKing.Api"
 RUN dotnet build "./TaskKing.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TaskKing.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./TaskKing.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
