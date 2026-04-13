@@ -33,5 +33,39 @@ namespace TaskKing.Api.Services
 
             return task;
         }
+        
+        public async Task<TaskItem?> GetTaskById(int id)
+        {
+            return await _context.TaskItems.FindAsync(id);
+        }
+        
+        public async Task<TaskItem?> UpdateTask(int id, TaskItem updated)
+        {
+            var task = await _context.TaskItems.FindAsync(id);
+
+            if (task == null)
+                return null;
+
+            task.Title = updated.Title;
+            task.Description = updated.Description;
+            task.Status = updated.Status;
+
+            await _context.SaveChangesAsync();
+
+            return task;
+        }
+        
+        public async Task<bool> DeleteTask(int id)
+        {
+            var task = await _context.TaskItems.FindAsync(id);
+
+            if (task == null)
+                return false;
+
+            _context.TaskItems.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }
