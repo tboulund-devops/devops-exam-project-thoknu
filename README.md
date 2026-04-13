@@ -1,29 +1,58 @@
 # Task King – Task Management
 
 ## Description
-Task management system allowing creating, organizing, and tracking tasks.
+Task management system allowing creation, organizing, and tracking of tasks.
 
 ---
 
-## Tech-stack
-- Backend: .NET Web API
-- Frontend: Static HTML/JS via wwwroot
-- Database: MariaDB with Flyway versioning
-- ORM: Entity Framework Core (Npgsql)
+## Tech Stack
+
+### Backend
+- .NET 9 Web API
+- Entity Framework Core
+
+### Database
+- MariaDB (Dockerized)
+- Flyway (database migrations)
+
+### Frontend
+- Static HTML/JavaScript (served via `wwwroot`)
+
+### DevOps / Infrastructure
+- Docker + Docker Compose
+- GitHub Actions CI/CD
+- k6 (load testing)
+- TestCafe (E2E testing)
+- GitHub Container Registry (GHCR)
 
 ---
 
 ## Architecture
-A simple 3-layer architecture:
 
-- Presentation layer: Static HTML/JS served from `wwwroot`
-- Application layer: Services handling business logic
-- Data layer: EF Core with PostgreSQL
+### High-level structure
+Presentation → API → Service Layer → Database
 
-Structure:
-Controllers → Services → DbContext
+- Presentation layer: `wwwroot` (HTML/JS)
+- API layer: Controllers
+- Service layer: Business logic
+- Data layer: EF Core + MariaDB
 
 ---
+
+## DevOps Pipeline
+
+### CI/CD Flow
+1. Build .NET application
+2. Run unit tests
+3. Build Docker image
+4. Push image to GHCR
+5. Deploy to staging (dev branch)
+6. Run E2E test(s) (TestCafe)
+7. Run load test(s) (k6)
+8. Deploy to production (main branch)
+
+---
+
 
 ## Feature plan
 
