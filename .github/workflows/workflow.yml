@@ -81,6 +81,12 @@ jobs:
             docker compose -f compose.staging.yaml pull
             docker compose -f compose.staging.yaml up -d
 
+      - name: Run k6 test (GET tasks)
+        run: |
+          docker run --rm -i \
+            -e BASE_URL=http://${{ secrets.STAGING_SERVER_IP }}:8000 \
+            grafana/k6 run - < k6/get-tasks-test.js
+
 
   deploy_prod:
     needs: build_test
