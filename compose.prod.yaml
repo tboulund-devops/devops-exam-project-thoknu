@@ -22,15 +22,16 @@
 
   flyway:
     image: flyway/flyway:latest
-    depends_on:
-      - mariadb
+    command:
+      -url=jdbc:mariadb://mariadb:3306/taskking
+      -user=taskking
+      -password=taskking
+      -locations=filesystem:/flyway/sql
+      migrate
     volumes:
       - ./db/migrations:/flyway/sql
-    command: migrate
-    environment:
-      FLYWAY_URL: jdbc:mariadb://mariadb:3306/taskking
-      FLYWAY_USER: taskking
-      FLYWAY_PASSWORD: taskking
+    depends_on:
+      - mariadb
     restart: "no"
 
 volumes:
