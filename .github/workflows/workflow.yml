@@ -98,7 +98,7 @@ jobs:
         run: |
           cd TaskKing.E2E
           npm ci
-          npx testcafe "chromium:headless" tests/ui.e2e.js
+          npx testcafe "chrome:headless --no-sandbox --disable-dev-shm-usage" tests/ui.e2e.js
         env:
           BASE_URL: http://${{ secrets.STAGING_SERVER_IP }}:8000
 
