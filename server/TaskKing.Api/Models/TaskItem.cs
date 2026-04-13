@@ -4,15 +4,19 @@ namespace TaskKing.Api.Models;
 
 public class TaskItem
 {
-    [Key]
+    public static class StatusValues
+    {
+        public const string Todo = "Todo";
+        public const string InProgress = "InProgress";
+        public const string Done = "Done";
+    }
     public int Id { get; set; }
-
-    [Required]
+    
     public string Title { get; set; } = string.Empty;
 
     public string? Description { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public string Status { get; set; } = "Todo"; // Todo, InProgress, Done
+    public string Status { get; set; } = StatusValues.Todo;
 }

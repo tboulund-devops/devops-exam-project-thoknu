@@ -11,29 +11,53 @@
         form { margin-top: 20px; }
         input { padding: 5px; width: 200px; }
         button { padding: 5px 10px; }
+        select { padding: 5px; margin-left: 5px; }
     </style>
 </head>
 <body>
+
 <h1>Task King</h1>
+
+<select id="filterStatus">
+    <option value="">All</option>
+    <option value="Todo">Todo</option>
+    <option value="InProgress">InProgress</option>
+    <option value="Done">Done</option>
+</select>
 
 <ul id="tasks"></ul>
 
 <form id="taskForm">
     <input type="text" id="taskTitle" placeholder="Task title" required />
+
+    <select id="taskStatus">
+        <option value="Todo">Todo</option>
+        <option value="InProgress">InProgress</option>
+        <option value="Done">Done</option>
+    </select>
+
     <button type="submit">Add Task</button>
 </form>
 
 <script>
     async function loadTasks() {
         try {
-            const response = await fetch('/api/tasks');
+            const filter = document.getElementById('filterStatus').value;
+
+            const url = filter
+                ? `/api/tasks/status/${filter}`
+                : `/api/tasks`;
+
+            const response = await fetch(url);
             const tasks = await response.json();
+
             const list = document.getElementById('tasks');
             list.innerHTML = '';
+
             tasks.forEach(task => {
                 const li = document.createElement('li');
 
-                li.textContent = `${task.id}: ${task.title} [${task.status}] `;
+                li.textContent = `${task.id}: ${task.title} (${task.status}) `;
 
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
@@ -78,16 +102,25 @@
 
     document.getElementById('taskForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const titleInput = document.getElementById('taskTitle');
+        const statusSelect = document.getElementById('taskStatus');
+
         const title = titleInput.value.trim();
+        const status = statusSelect.value;
+
         if (!title) return;
 
         try {
             await fetch('/api/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title })
+                body: JSON.stringify({
+                    title,
+                    status
+                })
             });
+
             titleInput.value = '';
             loadTasks();
         } catch (err) {
@@ -95,7 +128,11 @@
         }
     });
 
+    document.getElementById('filterStatus')
+        .addEventListener('change', loadTasks);
+
     loadTasks();
 </script>
+
 </body>
 </html>

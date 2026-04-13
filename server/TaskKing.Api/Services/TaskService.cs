@@ -7,6 +7,13 @@ namespace TaskKing.Api.Services
     public class TaskService
     {
         private readonly TaskKingDbContext _context;
+        
+        private static readonly string[] AllowedStatuses =
+        {
+            "Todo",
+            "InProgress",
+            "Done"
+        };
 
         public TaskService(TaskKingDbContext context)
         {
@@ -27,7 +34,12 @@ namespace TaskKing.Api.Services
 
             if (string.IsNullOrWhiteSpace(task.Title))
                 throw new ArgumentException("Title is required");
-
+            
+            if (!AllowedStatuses.Contains(task.Status))
+            {
+                task.Status = "Todo";
+            }
+            
             _context.TaskItems.Add(task);
             await _context.SaveChangesAsync();
 
@@ -39,6 +51,14 @@ namespace TaskKing.Api.Services
             return await _context.TaskItems.FindAsync(id);
         }
         
+        public async Task<IEnumerable<TaskItem>> GetAllTasksByStatus(string status)
+        {
+            return await _context.TaskItems
+                .Where(t => t.Status == status)
+                .OrderBy(t => t.Id)
+                .ToListAsync();
+        }
+        
         public async Task<TaskItem?> UpdateTask(int id, TaskItem updated)
         {
             var task = await _context.TaskItems.FindAsync(id);
@@ -46,6 +66,11 @@ namespace TaskKing.Api.Services
             if (task == null)
                 return null;
 
+            if (!AllowedStatuses.Contains(updated.Status))
+            {
+                return null;
+            }
+            
             task.Title = updated.Title;
             task.Description = updated.Description;
             task.Status = updated.Status;

@@ -26,7 +26,11 @@ namespace TaskKing.Api.Controllers
         {
             if (string.IsNullOrWhiteSpace(task.Title))
                 return BadRequest("Title is required.");
-
+            
+            {
+                task.Status = TaskItem.StatusValues.Todo;
+            }
+            
             var created = await _service.CreateTask(task);
             return CreatedAtAction(nameof(GetTasks), new { id = created.Id }, created);
         }
@@ -40,6 +44,12 @@ namespace TaskKing.Api.Controllers
                 return NotFound();
 
             return task;
+        }
+        
+        [HttpGet("status/{status}")]
+        public async Task<IEnumerable<TaskItem>> GetByStatus(string status)
+        {
+            return await _service.GetAllTasksByStatus(status);
         }
         
         [HttpPut("{id}")]
