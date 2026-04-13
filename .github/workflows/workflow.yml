@@ -64,7 +64,7 @@ jobs:
           host: ${{ secrets.STAGING_SERVER_IP }}
           username: ${{ secrets.STAGING_SERVER_USERNAME }}
           key: ${{ secrets.STAGING_SERVER_SSH_KEY }}
-          source: "compose.staging.yaml,db/migrations/V1__init.sql"
+          source: "compose.staging.yaml,db/migrations"
           target: app/
 
       - name: Deploy to staging
@@ -115,7 +115,7 @@ jobs:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          source: "compose.prod.yaml,db/migrations/V1__init.sql"
+          source: "compose.prod.yaml,db/migrations"
           target: app/
 
       - name: Deploy to production
