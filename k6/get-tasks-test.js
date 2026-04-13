@@ -6,7 +6,7 @@ export const options = {
     duration: '10s',
 };
 
-export default () {
+export default () => {
     const baseUrl = __ENV.BASE_URL;
     
     const res = http.get(`${baseUrl}/api/tasks`);
