@@ -80,6 +80,19 @@ jobs:
 
             docker compose -f compose.staging.yaml pull
             docker compose -f compose.staging.yaml up -d --force-recreate --remove-orphans
+            
+            echo "Waiting for API..."
+            for i in {1..30}; do
+            if curl -fs http://localhost:8000/api/tasks >/dev/null; then
+            echo "API ready"
+            exit 0
+            fi
+            sleep 2
+            done
+        
+            echo "API never became ready"
+            docker logs app-web-1 --tail 200
+            exit 1
 
       - name: Run k6 test (GET tasks)
         run: |
