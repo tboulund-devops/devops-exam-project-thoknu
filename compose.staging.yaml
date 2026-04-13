@@ -8,6 +8,8 @@
     depends_on:
       - mariadb
     restart: unless-stopped
+    networks:
+      - app-net
 
   mariadb:
     image: mariadb:latest
@@ -21,20 +23,11 @@
     ports:
       - "3306:3306"
     restart: unless-stopped
+    networks:
+      - app-net
 
-  flyway:
-    image: flyway/flyway:latest
-    command:
-      -url=jdbc:mariadb://mariadb:3306/taskking
-      -user=taskking
-      -password=taskking
-      -locations=filesystem:/flyway/sql
-      migrate
-    volumes:
-      - ./db/migrations:/flyway/sql
-    depends_on:
-      - mariadb
-    restart: "no"
-    
 volumes:
   mariadb_data:
+
+networks:
+  app-net:

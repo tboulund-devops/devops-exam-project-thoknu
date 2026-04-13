@@ -4,10 +4,12 @@
     environment:
       ConnectionStrings__DefaultConnection: "Host=mariadb;Port=3306;Database=taskking;Username=taskking;Password=taskking"
     ports:
-      - "80:8080"
+      - "8000:8080"
     depends_on:
       - mariadb
     restart: unless-stopped
+    networks:
+      - app-net
 
   mariadb:
     image: mariadb:latest
@@ -18,21 +20,14 @@
       MYSQL_DATABASE: taskking
       MYSQL_USER: taskking
       MYSQL_PASSWORD: taskking
+    ports:
+      - "3306:3306"
     restart: unless-stopped
-
-  flyway:
-    image: flyway/flyway:latest
-    command:
-      -url=jdbc:mariadb://mariadb:3306/taskking
-      -user=taskking
-      -password=taskking
-      -locations=filesystem:/flyway/sql
-      migrate
-    volumes:
-      - ./db/migrations:/flyway/sql
-    depends_on:
-      - mariadb
-    restart: "no"
+    networks:
+      - app-net
 
 volumes:
   mariadb_data:
+
+networks:
+  app-net:

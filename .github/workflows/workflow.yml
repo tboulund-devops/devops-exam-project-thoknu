@@ -78,8 +78,25 @@ jobs:
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
-            docker compose -f compose.staging.yaml pull
-            docker compose -f compose.staging.yaml up -d
+            docker compose -f compose.staging.yaml up -d mariadb
+
+            echo "Waiting for DB..."
+            until docker exec app-mariadb-1 mariadb -uroot -proot -e "SELECT 1" >/dev/null 2>&1; do
+              sleep 2
+            done
+
+            echo "Running migrations..."
+            docker run --rm \
+              --network app_app-net \
+              -v $(pwd)/db/migrations:/flyway/sql \
+              flyway/flyway \
+              -url=jdbc:mariadb://mariadb:3306/taskking \
+              -user=taskking \
+              -password=taskking \
+              migrate
+
+            echo "Starting app..."
+            docker compose -f compose.staging.yaml up -d web
 
       - name: Wait for API to respond
         run: |
@@ -142,5 +159,21 @@ jobs:
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
-            docker compose -f compose.prod.yaml pull
-            docker compose -f compose.prod.yaml up -d
+            docker compose -f compose.prod.yaml up -d mariadb
+
+            echo "Waiting for DB..."
+            until docker exec app-mariadb-1 mariadb -uroot -proot -e "SELECT 1" >/dev/null 2>&1; do
+              sleep 2
+            done
+
+            echo "Running migrations..."
+            docker run --rm \
+              --network app_app-net \
+              -v $(pwd)/db/migrations:/flyway/sql \
+              flyway/flyway \
+              -url=jdbc:mariadb://mariadb:3306/taskking \
+              -user=taskking \
+              -password=taskking \
+              migrate
+
+            docker compose -f compose.prod.yaml up -d web
