@@ -94,11 +94,13 @@ jobs:
             docker logs app-web-1 --tail 200
             exit 1
 
-      - name: Run TestCafe E2E tests
+      - name: Run E2E tests (TestCafe)
         run: |
           cd TaskKing.E2E
-          npm install testcafe
-          BASE_URL=http://${{ secrets.STAGING_SERVER_IP }}:8000 npx testcafe chrome tests/ui.e2e.js
+          npm ci
+          npx testcafe "chromium:headless" tests/ui.e2e.js
+        env:
+          BASE_URL: http://${{ secrets.STAGING_SERVER_IP }}:8000
 
       - name: Run k6 test (GET tasks)
         if: success()
