@@ -15,7 +15,7 @@ namespace TaskKing.Api.Services
 
         public async Task<IEnumerable<TaskItem>> GetAllTasks()
         {
-            return await _context.Tasks
+            return await _context.TaskItems
                 .OrderBy(t => t.Id)
                 .ToListAsync();
         }
@@ -28,7 +28,7 @@ namespace TaskKing.Api.Services
             if (string.IsNullOrWhiteSpace(task.Title))
                 throw new ArgumentException("Title is required");
 
-            _context.Tasks.Add(task);
+            _context.TaskItems.Add(task);
             await _context.SaveChangesAsync();
 
             return task;

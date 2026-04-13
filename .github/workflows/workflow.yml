@@ -19,7 +19,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 9.0.x
 
       - name: Restore
         run: dotnet restore
@@ -64,7 +64,7 @@ jobs:
           host: ${{ secrets.STAGING_SERVER_IP }}
           username: ${{ secrets.STAGING_SERVER_USERNAME }}
           key: ${{ secrets.STAGING_SERVER_SSH_KEY }}
-          source: "compose.staging.yaml,db/migrations/V1__init.sql"
+          source: "compose.staging.yaml,db/migrations"
           target: app/
 
       - name: Deploy to staging
@@ -79,7 +79,35 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
             docker compose -f compose.staging.yaml pull
-            docker compose -f compose.staging.yaml up -d
+            docker compose -f compose.staging.yaml up -d --force-recreate --remove-orphans
+            
+            echo "Waiting for API..."
+            for i in {1..30}; do
+            if curl -fs http://localhost:8000/api/tasks >/dev/null; then
+            echo "API ready"
+            exit 0
+            fi
+            sleep 2
+            done
+        
+            echo "API never became ready"
+            docker logs app-web-1 --tail 200
+            exit 1
+
+      - name: Run E2E tests (TestCafe)
+        run: |
+          cd TaskKing.E2E
+          npm ci
+          npx testcafe "chrome:headless --no-sandbox --disable-dev-shm-usage" tests/ui.e2e.js
+        env:
+          BASE_URL: http://${{ secrets.STAGING_SERVER_IP }}:8000
+
+      - name: Run k6 test (GET tasks)
+        if: success()
+        run: |
+          docker run --rm -i \
+            -e BASE_URL=http://${{ secrets.STAGING_SERVER_IP }}:8000 \
+            grafana/k6 run - < k6/get-tasks-test.js
 
 
   deploy_prod:
@@ -109,7 +137,7 @@ jobs:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           key: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          source: "compose.prod.yaml,db/migrations/V1__init.sql"
+          source: "compose.prod.yaml,db/migrations"
           target: app/
 
       - name: Deploy to production
@@ -124,4 +152,4 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
             docker compose -f compose.prod.yaml pull
-            docker compose -f compose.prod.yaml up -d
+            docker compose -f compose.prod.yaml up -d --force-recreate --remove-orphans

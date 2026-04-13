@@ -46,3 +46,10 @@ StrykerOutput/
 *.nupkg
 packages/
 .nuget/
+
+# Node / TestCafe E2E
+TaskKing.E2E/node_modules/
+TaskKing.E2E/node_modules
+TaskKing.E2E/.testcaferc*
+TaskKing.E2E/reports/
+TaskKing.E2E/*.log

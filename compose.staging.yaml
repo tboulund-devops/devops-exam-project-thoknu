@@ -1,27 +1,29 @@
 ﻿services:
-  web:
-    image: ghcr.io/thoknu/devops-exam-project-thoknu:staging
-    ports:
-      - "8000:8080"
-    depends_on:
-      - mariadb
-
   mariadb:
     image: mariadb:latest
-    volumes:
-      - mariadb_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: taskking
       MYSQL_USER: taskking
       MYSQL_PASSWORD: taskking
+    volumes:
+      - mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-net
 
   flyway:
     image: flyway/flyway:latest
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     volumes:
       - ./db/migrations:/flyway/sql
     command: migrate
@@ -29,7 +31,26 @@
       FLYWAY_URL: jdbc:mariadb://mariadb:3306/taskking
       FLYWAY_USER: taskking
       FLYWAY_PASSWORD: taskking
-    restart: "no"
-    
+    networks:
+      - app-net
+
+  web:
+    image: ghcr.io/thoknu/devops-exam-project-thoknu:staging
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=mariadb;Port=3306;Database=taskking;Username=taskking;Password=taskking"
+    ports:
+      - "8000:8080"
+    restart: unless-stopped
+    networks:
+      - app-net
+
 volumes:
   mariadb_data:
+
+networks:
+  app-net:
