@@ -21,15 +21,16 @@ test("create, edit and delete task", async t => {
     const createdTask = list.find('li').withText(title);
     await t.expect(createdTask.exists).ok({ timeout: 5000 });
 
-    await t
-        .setNativeDialogHandler(() => updatedTitle)
-        .click(createdTask.find('button').withText('Edit'));
+    await t.setNativeDialogHandler(() => updatedTitle);
+
+    await t.click(createdTask.find('button').withText('Edit'));
 
     const updatedTask = list.find('li').withText(updatedTitle);
     await t.expect(updatedTask.exists).ok({ timeout: 5000 });
 
-    await t
-        .click(updatedTask.find('button').withText('Delete'));
+    await t.setNativeDialogHandler(null);
+
+    await t.click(updatedTask.find('button').withText('Delete'));
 
     await t.expect(updatedTask.exists).notOk({ timeout: 5000 });
 });
