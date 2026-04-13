@@ -1,0 +1,1 @@
+﻿RENAME TABLE TaskItem TO TaskItems;

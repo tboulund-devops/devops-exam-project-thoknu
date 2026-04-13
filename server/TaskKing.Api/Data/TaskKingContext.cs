@@ -10,6 +10,6 @@ namespace TaskKing.Api.Data
         {
         }
 
-        public DbSet<TaskItem> Tasks { get; set; }
+        public DbSet<TaskItem> TaskItems { get; set; }
     }
 }

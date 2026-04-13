@@ -29,7 +29,7 @@ namespace TaskKing.Tests.Services
             var result = await service.CreateTask(task);
 
             Assert.Equal("Test task", result.Title);
-            Assert.Equal(1, context.Tasks.Count());
+            Assert.Equal(1, context.TaskItems.Count());
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace TaskKing.Tests.Services
         {
             var context = GetDbContext();
 
-            context.Tasks.AddRange(
+            context.TaskItems.AddRange(
                 new TaskItem { Title = "Task 1" },
                 new TaskItem { Title = "Task 2" }
             );
@@ -105,8 +105,8 @@ namespace TaskKing.Tests.Services
         {
             var context = GetDbContext();
 
-            context.Tasks.Add(new TaskItem { Title = "Task B" });
-            context.Tasks.Add(new TaskItem { Title = "Task A" });
+            context.TaskItems.Add(new TaskItem { Title = "Task B" });
+            context.TaskItems.Add(new TaskItem { Title = "Task A" });
 
             await context.SaveChangesAsync();
 
