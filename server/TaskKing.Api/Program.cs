@@ -9,7 +9,7 @@ var connectionString = Environment.GetEnvironmentVariable("TASKKING_DB")
                        ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<TaskKingDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
