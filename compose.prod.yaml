@@ -26,7 +26,12 @@
         condition: service_healthy
     volumes:
       - ./db/migrations:/flyway/sql
-    command: migrate
+    command: >
+      -url=jdbc:mariadb://mariadb:3306/taskking
+      -user=taskking
+      -password=taskking
+      -baselineOnMigrate=true
+      migrate
     environment:
       FLYWAY_URL: jdbc:mariadb://mariadb:3306/taskking
       FLYWAY_USER: taskking
