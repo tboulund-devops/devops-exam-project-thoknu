@@ -89,7 +89,9 @@ namespace TaskKing.Tests.Services
             var context = GetDbContext();
             var service = new TaskService(context);
 
-            await Assert.ThrowsAsync<ArgumentException>(() => service.CreateTask(null!));
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                service.CreateTask(null!)
+            );
         }
         
         [Fact]
