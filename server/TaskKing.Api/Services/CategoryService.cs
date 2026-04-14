@@ -2,6 +2,8 @@
 using TaskKing.Api.Data;
 using TaskKing.Api.Models;
 
+namespace TaskKing.Api.Services;
+
 public class CategoryService
 {
     private readonly TaskKingDbContext _context;
@@ -26,7 +28,7 @@ public class CategoryService
 
     public async Task<List<Category>> GetAll()
         => await _context.Categories
-            .OrderBy(c => c.Name)
+            .OrderBy(c => c.Id)
             .ToListAsync();
 
     public async Task<Category?> GetById(int id)
