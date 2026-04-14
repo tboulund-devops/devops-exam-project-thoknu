@@ -1,5 +1,8 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
+
+RUN adduser --disabled-password --gecos "" appuser
+
+USER appuser
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -13,7 +16,7 @@ RUN dotnet restore "TaskKing.Api/TaskKing.Api.csproj"
 
 COPY . .
 WORKDIR "/src/TaskKing.Api"
-RUN dotnet build "./TaskKing.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./TaskKing.Api.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "./TaskKing.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false

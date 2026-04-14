@@ -55,6 +55,7 @@ Presentation → API → Service Layer → Database
 
 
 ## Feature plan
+(Not doing individual feature branches because I'm solo, **chore:** in commit means new feature)
 
 ### Week 5
 Kick-off week - no features to be planned here

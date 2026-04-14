@@ -15,12 +15,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
+        
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+        
+      - name: Install tools
+        run: |
+          dotnet tool install -g dotnet-sonarscanner
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          dotnet tool install -g dotnet-stryker
 
+      - name: Start Static Code Analysis
+        run: |
+          dotnet sonarscanner begin \
+            /k:"${{ secrets.SONARQUBE_PROJECT_KEY }}" \
+            /d:sonar.host.url="${{ secrets.SONARQUBE_URL }}" \
+            /d:sonar.token="${{ secrets.SONARQUBE_TOKEN }}" \
+            /d:sonar.coverageReportPaths="coverage-report/SonarQube.xml" \
+            /d:sonar.qualitygate.wait=true \
+            /d:sonar.qualitygate.timeout=300 \
+            /d:sonar.coverage.exclusions=**/Program.cs,**/Controllers/*.cs,**/TaskKing.E2E/**,**/k6/**
+      
       - name: Restore
         run: dotnet restore
 
@@ -28,8 +47,38 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Test
-        run: dotnet test --no-build
+        run: dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory TestResults
 
+      - name: Generate coverage report
+        run: |
+          reportgenerator \
+          -reports:"TestResults/**/coverage.cobertura.xml" \
+          -targetdir:coverage-report \
+          -reporttypes:SonarQube
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
+
+      - name: Run Mutation Tests
+        run: dotnet stryker --config-file stryker-config.json --break-at 80
+        
+      - name: Upload Stryker Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stryker-report
+          path: StrykerOutput/**/reports
+      
+      - name: Complete Static Code Analysis
+        if: always()
+        run: |
+          dotnet sonarscanner end \
+            /d:sonar.token="${{ secrets.SONARQUBE_TOKEN }}"
+      
       - name: Application version
         id: semver
         uses: paulhatch/semantic-version@v5.4.0

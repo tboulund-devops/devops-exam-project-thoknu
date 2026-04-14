@@ -5,7 +5,7 @@ const baseUrl = process.env.BASE_URL;
 fixture("TaskKing UI E2E")
     .page(baseUrl);
 
-test("create task and verify it appears in list", async t => {
+test("create and delete task", async t => {
 
     const input = Selector('#taskTitle');
     const form = Selector('#taskForm');
@@ -17,7 +17,11 @@ test("create task and verify it appears in list", async t => {
         .typeText(input, title)
         .click(form.find('button'));
 
-    const taskItem = list.find('li').withText(title);
+    const createdTask = list.find('li').withText(title);
+    await t.expect(createdTask.exists).ok({ timeout: 5000 });
 
-    await t.expect(taskItem.exists).ok({ timeout: 5000 });
+    await t
+        .click(createdTask.find('button').withText('Delete'));
+
+    await t.expect(createdTask.exists).notOk({ timeout: 5000 });
 });

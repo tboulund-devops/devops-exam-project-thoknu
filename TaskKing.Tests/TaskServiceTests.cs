@@ -7,7 +7,7 @@ namespace TaskKing.Tests.Services
 {
     public class TaskServiceTests
     {
-        private TaskKingDbContext GetDbContext()
+        private static TaskKingDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<TaskKingDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -15,8 +15,6 @@ namespace TaskKing.Tests.Services
 
             return new TaskKingDbContext(options);
         }
-        
-        // Create Tests
 
         [Fact]
         public async Task CreateTask_ShouldAddTask_WhenValid()
@@ -67,8 +65,88 @@ namespace TaskKing.Tests.Services
 
             await Assert.ThrowsAsync<ArgumentException>(() => service.CreateTask(task));
         }
+        
+        [Fact]
+        public async Task CreateTask_ShouldDefaultStatus_WhenInvalid()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
 
-        // Get Tests
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = "INVALID"
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal("Todo", result.Status);
+        }
+        
+        [Fact]
+        public async Task CreateTask_ShouldThrow_WhenTaskIsNull()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                service.CreateTask(null!)
+            );
+        }
+        
+        [Fact]
+        public async Task CreateTask_ShouldKeepValidStatus()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = "Done"
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal("Done", result.Status);
+        }
+        
+        [Fact]
+        public async Task CreateTask_ShouldFallback_WhenStatusIsWhitespace()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = "   "
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal(TaskItem.StatusValues.Todo, result.Status);
+        }
+        
+        [Theory]
+        [InlineData("todo")]
+        [InlineData("DONE")]
+        [InlineData("inprogress")]
+        public async Task CreateTask_ShouldFallback_OnCaseMismatch(string status)
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = status
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal(TaskItem.StatusValues.Todo, result.Status);
+        }
 
         [Fact]
         public async Task GetAllTasks_ShouldReturnEmptyList_WhenNoTasks()
@@ -115,6 +193,301 @@ namespace TaskKing.Tests.Services
             var result = (await service.GetAllTasks()).ToList();
 
             Assert.True(result[0].Id < result[1].Id);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldUpdateTask_WhenValid()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Old", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var updated = new TaskItem
+            {
+                Title = "New",
+                Description = "Desc",
+                Status = "Done"
+            };
+
+            var result = await service.UpdateTask(task.Id, updated);
+
+            Assert.NotNull(result);
+            Assert.Equal("New", result!.Title);
+            Assert.Equal("Desc", result.Description);
+            Assert.Equal("Done", result.Status);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldReturnNull_WhenInvalidStatus()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Test", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var updated = new TaskItem
+            {
+                Title = "New",
+                Status = "INVALID"
+            };
+
+            var result = await service.UpdateTask(task.Id, updated);
+
+            Assert.Null(result);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldAccept_ValidStatusExactly()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Test", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var updated = new TaskItem
+            {
+                Title = "Test",
+                Status = "InProgress"
+            };
+
+            var result = await service.UpdateTask(task.Id, updated);
+
+            Assert.NotNull(result);
+            Assert.Equal("InProgress", result!.Status);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldReject_WhitespaceTitle()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Valid", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var result = await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "   ",
+                Description = "X",
+                Status = "Done"
+            });
+
+            Assert.Null(result);
+        }
+        
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task UpdateTask_ShouldReject_InvalidStatus(string status)
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Valid", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var result = await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "New",
+                Description = "Desc",
+                Status = status
+            });
+
+            Assert.Null(result);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldPersist_AllFields()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Old",
+                Description = "OldDesc",
+                Status = "Todo"
+            };
+
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "New",
+                Description = "NewDesc",
+                Status = "Done"
+            });
+
+            var dbTask = await context.TaskItems.FindAsync(task.Id);
+
+            Assert.Equal("New", dbTask!.Title);
+            Assert.Equal("NewDesc", dbTask.Description);
+            Assert.Equal("Done", dbTask.Status);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldReturnNull_WhenTaskNotFound()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var result = await service.UpdateTask(999, new TaskItem
+            {
+                Title = "Test",
+                Status = "Todo",
+                Description = "X"
+            });
+
+            Assert.Null(result);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldCorrectlyOverwrite_AllFields()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Old",
+                Description = "OldDesc",
+                Status = "Todo"
+            };
+
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "New",
+                Description = "NewDesc",
+                Status = "Done"
+            });
+
+            var dbTask = await context.TaskItems.FindAsync(task.Id);
+
+            Assert.Equal("New", dbTask!.Title);
+            Assert.Equal("NewDesc", dbTask.Description);
+            Assert.Equal("Done", dbTask.Status);
+        }
+        
+        [Fact]
+        public async Task DeleteTask_ShouldRemoveTask_WhenExists()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Delete me" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var result = await service.DeleteTask(task.Id);
+            
+            Assert.True(result);
+            Assert.DoesNotContain(context.TaskItems, t => t.Id == task.Id);
+        }
+        
+        [Fact]
+        public async Task DeleteTask_ShouldReturnFalse_WhenNotFound()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var result = await service.DeleteTask(999);
+
+            Assert.False(result);
+        }
+        
+        [Fact]
+        public async Task GetAllTasksByStatus_ShouldReturnFilteredTasks()
+        {
+            var context = GetDbContext();
+
+            context.TaskItems.AddRange(
+                new TaskItem { Title = "A", Status = "Todo" },
+                new TaskItem { Title = "B", Status = "Done" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(context);
+
+            var result = await service.GetAllTasksByStatus("Done");
+
+            Assert.Single(result);
+            Assert.Equal("Done", result.First().Status);
+        }
+        
+        [Fact]
+        public async Task GetAllTasksByStatus_ShouldReturnEmpty_WhenNoMatch()
+        {
+            var context = GetDbContext();
+
+            context.TaskItems.Add(new TaskItem { Title = "A", Status = "Todo" });
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(context);
+
+            var result = await service.GetAllTasksByStatus("Done");
+
+            Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetAllTasksByStatus_ShouldOnlyReturnExactMatches()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            context.TaskItems.AddRange(
+                new TaskItem { Title = "A", Status = "Done" },
+                new TaskItem { Title = "B", Status = "Todo" },
+                new TaskItem { Title = "C", Status = "Done" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = (await service.GetAllTasksByStatus("Done")).ToList();
+
+            Assert.Equal(2, result.Count);
+            Assert.All(result, t => Assert.Equal("Done", t.Status));
+        }
+        
+        [Fact]
+        public async Task GetTaskById_ShouldReturnTask_WhenExists()
+        {
+            var context = GetDbContext();
+
+            var task = new TaskItem { Title = "Test" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(context);
+
+            var result = await service.GetTaskById(task.Id);
+
+            Assert.NotNull(result);
+        }
+        
+        [Fact]
+        public async Task GetTaskById_ShouldReturnNull_WhenNotFound()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var result = await service.GetTaskById(999);
+
+            Assert.Null(result);
         }
     }
 }
