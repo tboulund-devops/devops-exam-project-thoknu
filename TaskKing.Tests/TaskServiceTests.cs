@@ -108,6 +108,23 @@ namespace TaskKing.Tests.Services
 
             Assert.Equal("Done", result.Status);
         }
+        
+        [Fact]
+        public async Task CreateTask_ShouldFallback_WhenStatusIsWhitespace()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = "   "
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal(TaskItem.StatusValues.Todo, result.Status);
+        }
 
         [Fact]
         public async Task GetAllTasks_ShouldReturnEmptyList_WhenNoTasks()
@@ -203,21 +220,6 @@ namespace TaskKing.Tests.Services
         }
         
         [Fact]
-        public async Task UpdateTask_ShouldReturnNull_WhenTaskNotFound()
-        {
-            var context = GetDbContext();
-            var service = new TaskService(context);
-
-            var result = await service.UpdateTask(999, new TaskItem
-            {
-                Title = "Test",
-                Status = "Todo"
-            });
-
-            Assert.Null(result);
-        }
-        
-        [Fact]
         public async Task UpdateTask_ShouldAccept_ValidStatusExactly()
         {
             var context = GetDbContext();
@@ -237,6 +239,94 @@ namespace TaskKing.Tests.Services
 
             Assert.NotNull(result);
             Assert.Equal("InProgress", result!.Status);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldReject_WhitespaceTitle()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Valid", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var result = await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "   ",
+                Description = "X",
+                Status = "Done"
+            });
+
+            Assert.Null(result);
+        }
+        
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task UpdateTask_ShouldReject_InvalidStatus(string status)
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Valid", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var result = await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "New",
+                Description = "Desc",
+                Status = status
+            });
+
+            Assert.Null(result);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldPersist_AllFields()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Old",
+                Description = "OldDesc",
+                Status = "Todo"
+            };
+
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "New",
+                Description = "NewDesc",
+                Status = "Done"
+            });
+
+            var dbTask = await context.TaskItems.FindAsync(task.Id);
+
+            Assert.Equal("New", dbTask!.Title);
+            Assert.Equal("NewDesc", dbTask.Description);
+            Assert.Equal("Done", dbTask.Status);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldReturnNull_WhenTaskNotFound()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var result = await service.UpdateTask(999, new TaskItem
+            {
+                Title = "Test",
+                Status = "Todo",
+                Description = "X"
+            });
+
+            Assert.Null(result);
         }
         
         [Fact]

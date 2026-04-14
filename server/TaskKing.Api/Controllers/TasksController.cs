@@ -24,9 +24,6 @@ namespace TaskKing.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<TaskItem>> CreateTask(TaskItem task)
         {
-            if (string.IsNullOrWhiteSpace(task.Title))
-                return BadRequest("Title is required.");
-            
             {
                 task.Status = TaskItem.StatusValues.Todo;
             }
@@ -55,9 +52,6 @@ namespace TaskKing.Api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<TaskItem>> UpdateTask(int id, TaskItem updated)
         {
-            if (string.IsNullOrWhiteSpace(updated.Title))
-                return BadRequest("Title is required.");
-
             var result = await _service.UpdateTask(id, updated);
 
             if (result == null)
