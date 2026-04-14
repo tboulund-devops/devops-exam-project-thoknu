@@ -72,9 +72,11 @@ namespace TaskKing.Api.Services
             
             if (task.CategoryId.HasValue)
             {
-                var exists = await _context.Categories.AnyAsync(c => c.Id == task.CategoryId.Value);
+                var exists = await _context.Categories
+                    .AnyAsync(c => c.Id == task.CategoryId.Value);
+
                 if (!exists)
-                    task.CategoryId = null;
+                    throw new ArgumentException("Invalid CategoryId");
             }
             
             _context.TaskItems.Add(task);
@@ -96,7 +98,9 @@ namespace TaskKing.Api.Services
         {
             ArgumentNullException.ThrowIfNull(updated);
 
-            var task = await _context.TaskItems.FindAsync(id);
+            var task = await _context.TaskItems
+                .Include(t => t.Category)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (task == null)
                 return null;
@@ -109,10 +113,12 @@ namespace TaskKing.Api.Services
 
             if (string.IsNullOrWhiteSpace(updated.Priority) || !AllowedPriorities.Contains(updated.Priority))
                 return null;
-            
+
             if (updated.CategoryId.HasValue)
             {
-                var exists = await _context.Categories.AnyAsync(c => c.Id == updated.CategoryId.Value);
+                var exists = await _context.Categories
+                    .AnyAsync(c => c.Id == updated.CategoryId.Value);
+
                 if (!exists)
                     return null;
             }
@@ -124,6 +130,7 @@ namespace TaskKing.Api.Services
             task.CategoryId = updated.CategoryId;
 
             await _context.SaveChangesAsync();
+
             return task;
         }
 
