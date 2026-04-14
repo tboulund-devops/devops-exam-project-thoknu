@@ -10,18 +10,15 @@
       "progress",
       "cleartext"
     ],
-    "ignore-files": [
-      "**/Controllers/*.cs",
-      "**/Program.cs",
-      "**/Migrations/*.cs",
-      "**/Models/TaskItem.cs"
+    "mutate": [
+      "!**/Controllers/*.cs",
+      "!**/Program.cs",
+      "!**/Migrations/**/*.cs",
+      "!**/Models/TaskItem.cs"
     ],
     "ignore-methods": [
       "*Controller*"
     ],
-    "mutate": [
-      "!**/Program.cs",
-      "!**/Migrations/**/*.cs"
-    ]
+    "mutation-level": "Complete"
   }
 }
