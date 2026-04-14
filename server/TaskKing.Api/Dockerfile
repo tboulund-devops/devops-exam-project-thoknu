@@ -16,7 +16,7 @@ RUN dotnet restore "TaskKing.Api/TaskKing.Api.csproj"
 
 COPY . .
 WORKDIR "/src/TaskKing.Api"
-RUN dotnet build "./TaskKing.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./TaskKing.Api.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "./TaskKing.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false

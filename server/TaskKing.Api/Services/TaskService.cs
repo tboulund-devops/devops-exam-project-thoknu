@@ -26,10 +26,10 @@ namespace TaskKing.Api.Services
         public async Task<TaskItem> CreateTask(TaskItem task)
         {
             if (task == null)
-                throw new ArgumentException();
+                throw new ArgumentNullException(nameof(task));
 
             if (string.IsNullOrWhiteSpace(task.Title))
-                throw new ArgumentException();
+                throw new ArgumentException("Title is required", nameof(task.Title));
 
             if (string.IsNullOrWhiteSpace(task.Status) || !AllowedStatuses.Contains(task.Status))
                 task.Status = TaskItem.StatusValues.Todo;
@@ -51,6 +51,9 @@ namespace TaskKing.Api.Services
 
         public async Task<TaskItem?> UpdateTask(int id, TaskItem updated)
         {
+            if (updated == null)
+                throw new ArgumentNullException(nameof(updated));
+
             var task = await _context.TaskItems.FindAsync(id);
 
             if (task == null)

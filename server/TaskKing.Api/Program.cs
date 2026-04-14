@@ -28,4 +28,4 @@ app.UseRouting();
 app.UseCors("AllowAll");
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

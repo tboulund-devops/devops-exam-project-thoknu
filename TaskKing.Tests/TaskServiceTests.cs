@@ -7,7 +7,7 @@ namespace TaskKing.Tests.Services
 {
     public class TaskServiceTests
     {
-        private TaskKingDbContext GetDbContext()
+        private static TaskKingDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<TaskKingDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
