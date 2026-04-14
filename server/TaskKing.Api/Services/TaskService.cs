@@ -66,19 +66,10 @@ namespace TaskKing.Api.Services
 
             if (string.IsNullOrWhiteSpace(task.Status) || !AllowedStatuses.Contains(task.Status))
                 task.Status = TaskItem.StatusValues.Todo;
-            
+
             if (string.IsNullOrWhiteSpace(task.Priority) || !AllowedPriorities.Contains(task.Priority))
                 task.Priority = TaskItem.PriorityValues.Medium;
-            
-            if (task.CategoryId.HasValue)
-            {
-                var exists = await _context.Categories
-                    .AnyAsync(c => c.Id == task.CategoryId.Value);
 
-                if (!exists)
-                    task.CategoryId = null;
-            }
-            
             _context.TaskItems.Add(task);
             await _context.SaveChangesAsync();
 
@@ -98,8 +89,7 @@ namespace TaskKing.Api.Services
         {
             ArgumentNullException.ThrowIfNull(updated);
 
-            var task = await _context.TaskItems
-                .FirstOrDefaultAsync(t => t.Id == id);
+            var task = await _context.TaskItems.FindAsync(id);
 
             if (task == null)
                 return null;
@@ -113,15 +103,6 @@ namespace TaskKing.Api.Services
             if (string.IsNullOrWhiteSpace(updated.Priority) ||
                 !AllowedPriorities.Contains(updated.Priority))
                 return null;
-
-            if (updated.CategoryId.HasValue)
-            {
-                var exists = await _context.Categories
-                    .AnyAsync(c => c.Id == updated.CategoryId.Value);
-
-                if (!exists)
-                    return null;
-            }
 
             task.Title = updated.Title;
             task.Description = updated.Description;
