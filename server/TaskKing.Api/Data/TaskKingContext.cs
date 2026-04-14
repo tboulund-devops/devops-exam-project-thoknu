@@ -11,5 +11,6 @@ namespace TaskKing.Api.Data
         }
 
         public DbSet<TaskItem> TaskItems { get; set; }
+        public DbSet<Category> Categories { get; set; }
     }
 }

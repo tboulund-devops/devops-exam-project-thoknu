@@ -194,6 +194,40 @@ namespace TaskKing.Tests.Services
 
             Assert.Equal(TaskItem.PriorityValues.Medium, result.Priority);
         }
+        
+        [Fact]
+        public async Task CreateTask_ShouldStoreCategoryId()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                CategoryId = 5
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal(5, result.CategoryId);
+        }
+        
+        [Fact]
+        public async Task CreateTask_ShouldAllowNullCategory()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                CategoryId = null
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Null(result.CategoryId);
+        }
 
         // ---------------- READ ----------------
 
@@ -361,6 +395,34 @@ namespace TaskKing.Tests.Services
 
             Assert.NotNull(result);
             Assert.Equal(TaskItem.PriorityValues.High, result!.Priority);
+        }
+        
+        [Fact]
+        public async Task UpdateTask_ShouldUpdateCategory()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Old",
+                CategoryId = 1
+            };
+
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var updated = new TaskItem
+            {
+                Title = "New",
+                CategoryId = 2,
+                Status = TaskItem.StatusValues.Todo,
+                Priority = TaskItem.PriorityValues.Medium
+            };
+
+            var result = await service.UpdateTask(task.Id, updated);
+
+            Assert.Equal(2, result!.CategoryId);
         }
 
         // ---------------- DELETE ----------------

@@ -43,19 +43,17 @@ namespace TaskKing.Api.Services
         
         public async Task<IEnumerable<TaskItem>> GetAllTasksSorted(string? sortBy)
         {
-            var tasks = await _context.TaskItems.ToListAsync();
+            var query = _context.TaskItems
+                .Include(t => t.Category)
+                .AsQueryable();
+
+            var tasks = await query.ToListAsync();
 
             return sortBy?.ToLower() switch
             {
-                "priority" => tasks
-                    .OrderByDescending(t => PriorityRank(t.Priority))
-                    .ThenBy(t => t.Id),
-
-                "created" => tasks
-                    .OrderBy(t => t.CreatedAt),
-
-                _ => tasks
-                    .OrderBy(t => t.Id)
+                "priority" => tasks.OrderByDescending(t => PriorityRank(t.Priority)).ThenBy(t => t.Id),
+                "created" => tasks.OrderBy(t => t.CreatedAt),
+                _ => tasks.OrderBy(t => t.Id)
             };
         }
         
@@ -71,6 +69,13 @@ namespace TaskKing.Api.Services
             
             if (string.IsNullOrWhiteSpace(task.Priority) || !AllowedPriorities.Contains(task.Priority))
                 task.Priority = TaskItem.PriorityValues.Medium;
+            
+            if (task.CategoryId != null)
+            {
+                var exists = await _context.Categories.AnyAsync(c => c.Id == task.CategoryId);
+                if (!exists)
+                    return null;
+            }
             
             _context.TaskItems.Add(task);
             await _context.SaveChangesAsync();
@@ -104,11 +109,19 @@ namespace TaskKing.Api.Services
 
             if (string.IsNullOrWhiteSpace(updated.Priority) || !AllowedPriorities.Contains(updated.Priority))
                 return null;
+            
+            if (updated.CategoryId != null)
+            {
+                var exists = await _context.Categories.AnyAsync(c => c.Id == updated.CategoryId.Value);
+                if (!exists)
+                    return null;
+            }
 
             task.Title = updated.Title;
             task.Description = updated.Description;
             task.Status = updated.Status;
             task.Priority = updated.Priority;
+            task.CategoryId = updated.CategoryId;
 
             await _context.SaveChangesAsync();
             return task;

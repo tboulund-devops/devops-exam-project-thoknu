@@ -28,7 +28,9 @@ namespace TaskKing.Api.Controllers
                 Description = t.Description,
                 CreatedAt = t.CreatedAt,
                 Status = t.Status,
-                Priority = t.Priority
+                Priority = t.Priority,
+                CategoryId = t.CategoryId,
+                CategoryName = t.Category?.Name
             });
         }
 
@@ -40,7 +42,8 @@ namespace TaskKing.Api.Controllers
                 Title = dto.Title,
                 Description = dto.Description,
                 Status = dto.Status ?? TaskItem.StatusValues.Todo,
-                Priority = dto.Priority ?? TaskItem.PriorityValues.Medium
+                Priority = dto.Priority ?? TaskItem.PriorityValues.Medium,
+                CategoryId = dto.CategoryId
             };
 
             var created = await _service.CreateTask(task);
@@ -52,7 +55,9 @@ namespace TaskKing.Api.Controllers
                 Description = created.Description,
                 CreatedAt = created.CreatedAt,
                 Status = created.Status,
-                Priority = created.Priority
+                Priority = created.Priority,
+                CategoryId = created.CategoryId,
+                CategoryName = created.Category?.Name
             };
 
             return CreatedAtAction(nameof(GetTask), new { id = created.Id }, result);
@@ -73,7 +78,9 @@ namespace TaskKing.Api.Controllers
                 Description = task.Description,
                 CreatedAt = task.CreatedAt,
                 Status = task.Status,
-                Priority = task.Priority
+                Priority = task.Priority,
+                CategoryId = task.CategoryId,
+                CategoryName = task.Category?.Name
             };
 
             return Ok(result);
@@ -91,7 +98,9 @@ namespace TaskKing.Api.Controllers
                 Description = t.Description,
                 CreatedAt = t.CreatedAt,
                 Status = t.Status,
-                Priority = t.Priority
+                Priority = t.Priority,
+                CategoryId = t.CategoryId,
+                CategoryName = t.Category?.Name
             });
         }
 
@@ -102,8 +111,9 @@ namespace TaskKing.Api.Controllers
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Status = dto.Status ?? TaskItem.StatusValues.Todo,
-                Priority = dto.Priority ?? TaskItem.PriorityValues.Medium
+                Status = dto.Status!,
+                Priority = dto.Priority!,
+                CategoryId = dto.CategoryId
             };
 
             var result = await _service.UpdateTask(id, updated);
@@ -118,7 +128,9 @@ namespace TaskKing.Api.Controllers
                 Description = result.Description,
                 CreatedAt = result.CreatedAt,
                 Status = result.Status,
-                Priority = result.Priority
+                Priority = result.Priority,
+                CategoryId = result.CategoryId,
+                CategoryName = result.Category?.Name
             };
 
             return Ok(response);

@@ -49,10 +49,27 @@
         <option value="High">High</option>
     </select>
 
+    <select id="taskCategory">
+        <option value="">No category</option>
+    </select>
+
     <button type="submit">Add Task</button>
 </form>
 
 <script>
+    let categories = [];
+
+    async function loadCategories() {
+        const res = await fetch('/api/categories');
+        categories = await res.json();
+
+        const select = document.getElementById('taskCategory');
+        select.innerHTML = '<option value="">No category</option>' +
+            categories.map(c =>
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
+    }
+
     async function loadTasks() {
         try {
             const filter = document.getElementById('filterStatus').value;
@@ -77,7 +94,10 @@
             tasks.forEach(task => {
                 const li = document.createElement('li');
 
-                li.textContent = `${task.id}: ${task.title} [${task.priority}] (${task.status}) `;
+                const categoryName = task.categoryName ?? "No category";
+
+                li.textContent =
+                    `${task.id}: ${task.title} [${task.priority}] (${task.status}) - ${categoryName} `;
 
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
@@ -99,6 +119,8 @@
                     const newPriority = prompt("Priority (Low/Medium/High):", task.priority) || task.priority;
                     const newStatus = prompt("Status (Todo/InProgress/Done):", task.status) || task.status;
 
+                    const newCategoryId = prompt("Category ID:", task.categoryId ?? "") || task.categoryId;
+
                     await fetch(`/api/tasks/${task.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -106,7 +128,8 @@
                             title: newTitle,
                             description: task.description,
                             status: newStatus,
-                            priority: newPriority
+                            priority: newPriority,
+                            categoryId: newCategoryId ? parseInt(newCategoryId) : null
                         })
                     });
 
@@ -128,25 +151,23 @@
         const title = document.getElementById('taskTitle').value.trim();
         const status = document.getElementById('taskStatus').value;
         const priority = document.getElementById('taskPriority').value;
+        const categoryId = document.getElementById('taskCategory').value;
 
         if (!title) return;
 
-        try {
-            await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title,
-                    status,
-                    priority
-                })
-            });
+        await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title,
+                status,
+                priority,
+                categoryId: categoryId ? parseInt(categoryId) : null
+            })
+        });
 
-            document.getElementById('taskTitle').value = '';
-            loadTasks();
-        } catch (err) {
-            console.error('Error creating task:', err);
-        }
+        document.getElementById('taskTitle').value = '';
+        loadTasks();
     });
 
     document.getElementById('filterStatus')
@@ -155,6 +176,7 @@
     document.getElementById('sortTasks')
         .addEventListener('change', loadTasks);
 
+    loadCategories();
     loadTasks();
 </script>
 
