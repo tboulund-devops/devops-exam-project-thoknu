@@ -28,7 +28,7 @@ public class CategoryService
 
     public async Task<List<Category>> GetAll()
         => await _context.Categories
-            .OrderBy(c => c.Id)
+            .OrderBy(c => c.Name)
             .ToListAsync();
 
     public async Task<Category?> GetById(int id)
