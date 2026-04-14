@@ -61,10 +61,18 @@
 
     async function loadCategories() {
         const res = await fetch('/api/categories');
-        categories = await res.json();
+
+        if (!res.ok) {
+            categories = [];
+            return;
+        }
+
+        const text = await res.text();
+        categories = text ? JSON.parse(text) : [];
 
         const select = document.getElementById('taskCategory');
-        select.innerHTML = '<option value="">No category</option>' +
+        select.innerHTML =
+            '<option value="">No category</option>' +
             categories.map(c =>
                 `<option value="${c.id}">${c.name}</option>`
             ).join('');
