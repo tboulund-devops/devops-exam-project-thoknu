@@ -29,4 +29,8 @@ public class TaskItem
     public string Status { get; set; } = StatusValues.Todo;
     
     public string Priority { get; set; } = PriorityValues.Medium;
+    
+    public int? CategoryId { get; set; }
+    
+    public Category? Category { get; set; }
 }

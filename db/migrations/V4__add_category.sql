@@ -1,0 +1,10 @@
+﻿CREATE TABLE Categories (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL
+);
+
+ALTER TABLE TaskItems
+ADD COLUMN CategoryId INT NULL,
+ADD CONSTRAINT FK_TaskItems_Categories
+    FOREIGN KEY (CategoryId) REFERENCES Categories(Id)
+    ON DELETE SET NULL;
