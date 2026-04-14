@@ -70,11 +70,11 @@ namespace TaskKing.Api.Services
             if (string.IsNullOrWhiteSpace(task.Priority) || !AllowedPriorities.Contains(task.Priority))
                 task.Priority = TaskItem.PriorityValues.Medium;
             
-            if (task.CategoryId != null)
+            if (task.CategoryId.HasValue)
             {
-                var exists = await _context.Categories.AnyAsync(c => c.Id == task.CategoryId);
+                var exists = await _context.Categories.AnyAsync(c => c.Id == task.CategoryId.Value);
                 if (!exists)
-                    return null;
+                    task.CategoryId = null;
             }
             
             _context.TaskItems.Add(task);
@@ -110,7 +110,7 @@ namespace TaskKing.Api.Services
             if (string.IsNullOrWhiteSpace(updated.Priority) || !AllowedPriorities.Contains(updated.Priority))
                 return null;
             
-            if (updated.CategoryId != null)
+            if (updated.CategoryId.HasValue)
             {
                 var exists = await _context.Categories.AnyAsync(c => c.Id == updated.CategoryId.Value);
                 if (!exists)
