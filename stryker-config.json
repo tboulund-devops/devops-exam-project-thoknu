@@ -14,7 +14,8 @@
       "!**/Controllers/*.cs",
       "!**/Program.cs",
       "!**/Migrations/**/*.cs",
-      "!**/Models/TaskItem.cs"
+      "!**/Models/TaskItem.cs",
+      "!**/DTOs/**/*.cs"
     ],
     "ignore-methods": [
       "*Controller*"
