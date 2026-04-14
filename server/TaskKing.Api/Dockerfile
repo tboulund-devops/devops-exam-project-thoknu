@@ -1,5 +1,8 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
+
+RUN adduser --disabled-password --gecos "" appuser
+
+USER appuser
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
