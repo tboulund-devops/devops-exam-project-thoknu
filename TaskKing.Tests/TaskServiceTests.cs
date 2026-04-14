@@ -82,6 +82,32 @@ namespace TaskKing.Tests.Services
 
             Assert.Equal("Todo", result.Status);
         }
+        
+        [Fact]
+        public async Task CreateTask_ShouldThrow_WhenTaskIsNull()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            await Assert.ThrowsAsync<ArgumentException>(() => service.CreateTask(null!));
+        }
+        
+        [Fact]
+        public async Task CreateTask_ShouldKeepValidStatus()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = "Done"
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal("Done", result.Status);
+        }
 
         [Fact]
         public async Task GetAllTasks_ShouldReturnEmptyList_WhenNoTasks()
@@ -151,6 +177,7 @@ namespace TaskKing.Tests.Services
 
             Assert.NotNull(result);
             Assert.Equal("New", result!.Title);
+            Assert.Equal("Desc", result.Description);
             Assert.Equal("Done", result.Status);
         }
         
@@ -191,6 +218,28 @@ namespace TaskKing.Tests.Services
         }
         
         [Fact]
+        public async Task UpdateTask_ShouldAccept_ValidStatusExactly()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem { Title = "Test", Status = "Todo" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var updated = new TaskItem
+            {
+                Title = "Test",
+                Status = "InProgress"
+            };
+
+            var result = await service.UpdateTask(task.Id, updated);
+
+            Assert.NotNull(result);
+            Assert.Equal("InProgress", result!.Status);
+        }
+        
+        [Fact]
         public async Task DeleteTask_ShouldRemoveTask_WhenExists()
         {
             var context = GetDbContext();
@@ -201,9 +250,9 @@ namespace TaskKing.Tests.Services
             await context.SaveChangesAsync();
 
             var result = await service.DeleteTask(task.Id);
-
+            
             Assert.True(result);
-            Assert.Empty(context.TaskItems);
+            Assert.DoesNotContain(context.TaskItems, t => t.Id == task.Id);
         }
         
         [Fact]
@@ -235,6 +284,48 @@ namespace TaskKing.Tests.Services
 
             Assert.Single(result);
             Assert.Equal("Done", result.First().Status);
+        }
+        
+        [Fact]
+        public async Task GetAllTasksByStatus_ShouldReturnEmpty_WhenNoMatch()
+        {
+            var context = GetDbContext();
+
+            context.TaskItems.Add(new TaskItem { Title = "A", Status = "Todo" });
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(context);
+
+            var result = await service.GetAllTasksByStatus("Done");
+
+            Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetTaskById_ShouldReturnTask_WhenExists()
+        {
+            var context = GetDbContext();
+
+            var task = new TaskItem { Title = "Test" };
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            var service = new TaskService(context);
+
+            var result = await service.GetTaskById(task.Id);
+
+            Assert.NotNull(result);
+        }
+        
+        [Fact]
+        public async Task GetTaskById_ShouldReturnNull_WhenNotFound()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var result = await service.GetTaskById(999);
+
+            Assert.Null(result);
         }
     }
 }
