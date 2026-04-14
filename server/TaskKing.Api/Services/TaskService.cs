@@ -76,7 +76,7 @@ namespace TaskKing.Api.Services
                     .AnyAsync(c => c.Id == task.CategoryId.Value);
 
                 if (!exists)
-                    throw new ArgumentException("Invalid CategoryId");
+                    task.CategoryId = null;
             }
             
             _context.TaskItems.Add(task);
@@ -99,7 +99,6 @@ namespace TaskKing.Api.Services
             ArgumentNullException.ThrowIfNull(updated);
 
             var task = await _context.TaskItems
-                .Include(t => t.Category)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (task == null)
@@ -111,7 +110,8 @@ namespace TaskKing.Api.Services
             if (!AllowedStatuses.Contains(updated.Status))
                 return null;
 
-            if (string.IsNullOrWhiteSpace(updated.Priority) || !AllowedPriorities.Contains(updated.Priority))
+            if (string.IsNullOrWhiteSpace(updated.Priority) ||
+                !AllowedPriorities.Contains(updated.Priority))
                 return null;
 
             if (updated.CategoryId.HasValue)
@@ -131,7 +131,9 @@ namespace TaskKing.Api.Services
 
             await _context.SaveChangesAsync();
 
-            return task;
+            return await _context.TaskItems
+                .Include(t => t.Category)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<bool> DeleteTask(int id)
