@@ -15,6 +15,13 @@ namespace TaskKing.Api.Services
             TaskItem.StatusValues.Done
         };
         
+        private static readonly string[] AllowedPriorities =
+        {
+            TaskItem.PriorityValues.Low,
+            TaskItem.PriorityValues.Medium,
+            TaskItem.PriorityValues.High
+        };
+        
         private static int PriorityRank(string priority)
         {
             return priority switch
@@ -62,7 +69,7 @@ namespace TaskKing.Api.Services
             if (string.IsNullOrWhiteSpace(task.Status) || !AllowedStatuses.Contains(task.Status))
                 task.Status = TaskItem.StatusValues.Todo;
             
-            if (string.IsNullOrWhiteSpace(task.Priority))
+            if (string.IsNullOrWhiteSpace(task.Priority) || !AllowedPriorities.Contains(task.Priority))
                 task.Priority = TaskItem.PriorityValues.Medium;
             
             _context.TaskItems.Add(task);
@@ -95,9 +102,9 @@ namespace TaskKing.Api.Services
             if (!AllowedStatuses.Contains(updated.Status))
                 return null;
 
-            if (string.IsNullOrWhiteSpace(updated.Priority))
-                updated.Priority = TaskItem.PriorityValues.Medium;
-            
+            if (string.IsNullOrWhiteSpace(updated.Priority) || !AllowedPriorities.Contains(updated.Priority))
+                return null;
+
             task.Title = updated.Title;
             task.Description = updated.Description;
             task.Status = updated.Status;
