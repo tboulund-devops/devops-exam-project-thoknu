@@ -8,22 +8,29 @@
         h1 { color: #333; }
         ul { list-style-type: none; padding: 0; }
         li { padding: 5px 0; }
-        form { margin-top: 20px; }
-        input { padding: 5px; width: 200px; }
+        form { margin-top: 20px; display: flex; gap: 5px; flex-wrap: wrap; }
+        input, select { padding: 5px; }
         button { padding: 5px 10px; }
-        select { padding: 5px; margin-left: 5px; }
     </style>
 </head>
 <body>
 
 <h1>Task King</h1>
 
-<select id="filterStatus">
-    <option value="">All</option>
-    <option value="Todo">Todo</option>
-    <option value="InProgress">InProgress</option>
-    <option value="Done">Done</option>
-</select>
+<div style="margin-bottom: 10px;">
+    <select id="filterStatus">
+        <option value="">All</option>
+        <option value="Todo">Todo</option>
+        <option value="InProgress">InProgress</option>
+        <option value="Done">Done</option>
+    </select>
+
+    <select id="sortTasks">
+        <option value="">Default</option>
+        <option value="created">Created</option>
+        <option value="priority">Priority</option>
+    </select>
+</div>
 
 <ul id="tasks"></ul>
 
@@ -36,6 +43,12 @@
         <option value="Done">Done</option>
     </select>
 
+    <select id="taskPriority">
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+    </select>
+
     <button type="submit">Add Task</button>
 </form>
 
@@ -43,10 +56,17 @@
     async function loadTasks() {
         try {
             const filter = document.getElementById('filterStatus').value;
+            const sort = document.getElementById('sortTasks').value;
 
-            const url = filter
-                ? `/api/tasks/status/${filter}`
-                : `/api/tasks`;
+            let url = '';
+
+            if (filter) {
+                url = `/api/tasks/status/${filter}`;
+            } else if (sort) {
+                url = `/api/tasks?sort=${sort}`;
+            } else {
+                url = `/api/tasks`;
+            }
 
             const response = await fetch(url);
             const tasks = await response.json();
@@ -57,16 +77,14 @@
             tasks.forEach(task => {
                 const li = document.createElement('li');
 
-                li.textContent = `${task.id}: ${task.title} (${task.status}) `;
+                li.textContent = `${task.id}: ${task.title} [${task.priority}] (${task.status}) `;
 
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
                 delBtn.style.marginLeft = "10px";
 
                 delBtn.onclick = async () => {
-                    await fetch(`/api/tasks/${task.id}`, {
-                        method: 'DELETE'
-                    });
+                    await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
                     loadTasks();
                 };
 
@@ -78,13 +96,17 @@
                     const newTitle = prompt("New title:", task.title);
                     if (!newTitle) return;
 
+                    const newPriority = prompt("Priority (Low/Medium/High):", task.priority) || task.priority;
+                    const newStatus = prompt("Status (Todo/InProgress/Done):", task.status) || task.status;
+
                     await fetch(`/api/tasks/${task.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             title: newTitle,
                             description: task.description,
-                            status: task.status
+                            status: newStatus,
+                            priority: newPriority
                         })
                     });
 
@@ -103,11 +125,9 @@
     document.getElementById('taskForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const titleInput = document.getElementById('taskTitle');
-        const statusSelect = document.getElementById('taskStatus');
-
-        const title = titleInput.value.trim();
-        const status = statusSelect.value;
+        const title = document.getElementById('taskTitle').value.trim();
+        const status = document.getElementById('taskStatus').value;
+        const priority = document.getElementById('taskPriority').value;
 
         if (!title) return;
 
@@ -117,11 +137,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title,
-                    status
+                    status,
+                    priority
                 })
             });
 
-            titleInput.value = '';
+            document.getElementById('taskTitle').value = '';
             loadTasks();
         } catch (err) {
             console.error('Error creating task:', err);
@@ -129,6 +150,9 @@
     });
 
     document.getElementById('filterStatus')
+        .addEventListener('change', loadTasks);
+
+    document.getElementById('sortTasks')
         .addEventListener('change', loadTasks);
 
     loadTasks();
