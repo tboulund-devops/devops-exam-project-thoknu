@@ -125,6 +125,26 @@ namespace TaskKing.Tests.Services
 
             Assert.Equal(TaskItem.StatusValues.Todo, result.Status);
         }
+        
+        [Theory]
+        [InlineData("todo")]
+        [InlineData("DONE")]
+        [InlineData("inprogress")]
+        public async Task CreateTask_ShouldFallback_OnCaseMismatch(string status)
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Test",
+                Status = status
+            };
+
+            var result = await service.CreateTask(task);
+
+            Assert.Equal(TaskItem.StatusValues.Todo, result.Status);
+        }
 
         [Fact]
         public async Task GetAllTasks_ShouldReturnEmptyList_WhenNoTasks()
@@ -330,6 +350,36 @@ namespace TaskKing.Tests.Services
         }
         
         [Fact]
+        public async Task UpdateTask_ShouldCorrectlyOverwrite_AllFields()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            var task = new TaskItem
+            {
+                Title = "Old",
+                Description = "OldDesc",
+                Status = "Todo"
+            };
+
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            await service.UpdateTask(task.Id, new TaskItem
+            {
+                Title = "New",
+                Description = "NewDesc",
+                Status = "Done"
+            });
+
+            var dbTask = await context.TaskItems.FindAsync(task.Id);
+
+            Assert.Equal("New", dbTask!.Title);
+            Assert.Equal("NewDesc", dbTask.Description);
+            Assert.Equal("Done", dbTask.Status);
+        }
+        
+        [Fact]
         public async Task DeleteTask_ShouldRemoveTask_WhenExists()
         {
             var context = GetDbContext();
@@ -389,6 +439,26 @@ namespace TaskKing.Tests.Services
             var result = await service.GetAllTasksByStatus("Done");
 
             Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetAllTasksByStatus_ShouldOnlyReturnExactMatches()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            context.TaskItems.AddRange(
+                new TaskItem { Title = "A", Status = "Done" },
+                new TaskItem { Title = "B", Status = "Todo" },
+                new TaskItem { Title = "C", Status = "Done" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = (await service.GetAllTasksByStatus("Done")).ToList();
+
+            Assert.Equal(2, result.Count);
+            Assert.All(result, t => Assert.Equal("Done", t.Status));
         }
         
         [Fact]

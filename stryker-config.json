@@ -1,0 +1,27 @@
+﻿{
+  "stryker-config": {
+    "solution": "TaskKing.sln",
+    "project": "TaskKing.Api/TaskKing.Api.csproj",
+    "test-projects": [
+      "TaskKing.Tests/TaskKing.Tests.csproj"
+    ],
+    "reporters": [
+      "html",
+      "progress",
+      "cleartext"
+    ],
+    "ignore-files": [
+      "**/Controllers/*.cs",
+      "**/Program.cs",
+      "**/Migrations/*.cs",
+      "**/Models/TaskItem.cs"
+    ],
+    "ignore-methods": [
+      "*Controller*"
+    ],
+    "mutate": [
+      "!**/Program.cs",
+      "!**/Migrations/**/*.cs"
+    ]
+  }
+}
