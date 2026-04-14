@@ -1,0 +1,2 @@
+﻿ALTER TABLE TaskItems
+ADD COLUMN Priority VARCHAR(50) NOT NULL DEFAULT 'Medium';

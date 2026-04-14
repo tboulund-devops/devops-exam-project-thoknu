@@ -15,11 +15,11 @@ namespace TaskKing.Api.Controllers
         {
             _service = service;
         }
-
+        
         [HttpGet]
-        public async Task<IEnumerable<TaskDto>> GetTasks()
+        public async Task<IEnumerable<TaskDto>> GetTasks([FromQuery] string? sort)
         {
-            var tasks = await _service.GetAllTasks();
+            var tasks = await _service.GetAllTasksSorted(sort);
 
             return tasks.Select(t => new TaskDto
             {
@@ -27,7 +27,8 @@ namespace TaskKing.Api.Controllers
                 Title = t.Title,
                 Description = t.Description,
                 CreatedAt = t.CreatedAt,
-                Status = t.Status
+                Status = t.Status,
+                Priority = t.Priority
             });
         }
 
@@ -38,7 +39,8 @@ namespace TaskKing.Api.Controllers
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Status = dto.Status ?? TaskItem.StatusValues.Todo
+                Status = dto.Status ?? TaskItem.StatusValues.Todo,
+                Priority = dto.Priority ?? TaskItem.PriorityValues.Medium
             };
 
             var created = await _service.CreateTask(task);
@@ -49,7 +51,8 @@ namespace TaskKing.Api.Controllers
                 Title = created.Title,
                 Description = created.Description,
                 CreatedAt = created.CreatedAt,
-                Status = created.Status
+                Status = created.Status,
+                Priority = created.Priority
             };
 
             return CreatedAtAction(nameof(GetTask), new { id = created.Id }, result);
@@ -69,7 +72,8 @@ namespace TaskKing.Api.Controllers
                 Title = task.Title,
                 Description = task.Description,
                 CreatedAt = task.CreatedAt,
-                Status = task.Status
+                Status = task.Status,
+                Priority = task.Priority
             };
 
             return Ok(result);
@@ -86,7 +90,8 @@ namespace TaskKing.Api.Controllers
                 Title = t.Title,
                 Description = t.Description,
                 CreatedAt = t.CreatedAt,
-                Status = t.Status
+                Status = t.Status,
+                Priority = t.Priority
             });
         }
 
@@ -97,7 +102,8 @@ namespace TaskKing.Api.Controllers
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Status = dto.Status ?? TaskItem.StatusValues.Todo
+                Status = dto.Status ?? TaskItem.StatusValues.Todo,
+                Priority = dto.Priority ?? TaskItem.PriorityValues.Medium
             };
 
             var result = await _service.UpdateTask(id, updated);
@@ -111,7 +117,8 @@ namespace TaskKing.Api.Controllers
                 Title = result.Title,
                 Description = result.Description,
                 CreatedAt = result.CreatedAt,
-                Status = result.Status
+                Status = result.Status,
+                Priority = result.Priority
             };
 
             return Ok(response);
