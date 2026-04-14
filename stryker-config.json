@@ -1,6 +1,6 @@
 ﻿{
   "stryker-config": {
-    "solution": "TaskKing.sln",
+    "solution": "TaskKing.slnx",
     "project": "TaskKing.Api/TaskKing.Api.csproj",
     "test-projects": [
       "TaskKing.Tests/TaskKing.Tests.csproj"
