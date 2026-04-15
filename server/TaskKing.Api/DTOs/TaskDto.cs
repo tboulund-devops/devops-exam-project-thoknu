@@ -8,6 +8,7 @@ public class TaskDto
     public DateTime CreatedAt { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? Priority { get; set; }
+    public DateTime? DueDate { get; set; }
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
 }

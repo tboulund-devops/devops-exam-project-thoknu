@@ -146,5 +146,23 @@ namespace TaskKing.Api.Controllers
 
             return NoContent();
         }
+        
+        [HttpGet("overdue")]
+        public async Task<IEnumerable<TaskDto>> GetOverdue()
+        {
+            var tasks = await _service.GetOverdueTasks();
+
+            return tasks.Select(t => new TaskDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                CreatedAt = t.CreatedAt,
+                Status = t.Status,
+                Priority = t.Priority,
+                DueDate = t.DueDate,
+                CategoryId = t.CategoryId
+            });
+        }
     }
 }

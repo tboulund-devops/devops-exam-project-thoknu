@@ -11,6 +11,7 @@
         form { margin-top: 20px; display: flex; gap: 5px; flex-wrap: wrap; }
         input, select { padding: 5px; }
         button { padding: 5px 10px; }
+        .overdue { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -40,6 +41,11 @@
         <option value="created">Created</option>
         <option value="priority">Priority</option>
     </select>
+
+    <select id="filterOverdue">
+        <option value="">All Tasks</option>
+        <option value="overdue">Overdue Only</option>
+    </select>
 </div>
 
 <ul id="tasks"></ul>
@@ -62,6 +68,8 @@
     <select id="taskCategory">
         <option value="">No category</option>
     </select>
+
+    <input type="datetime-local" id="taskDueDate" />
 
     <button type="submit">Add Task</button>
 </form>
@@ -136,6 +144,7 @@
         try {
             const filter = document.getElementById('filterStatus').value;
             const sort = document.getElementById('sortTasks').value;
+            const overdue = document.getElementById('filterOverdue').value;
 
             let url = '';
 
@@ -150,16 +159,34 @@
             const response = await fetch(url);
             const tasks = await response.json();
 
+            const now = new Date();
+
+            let filtered = tasks;
+
+            if (overdue === "overdue") {
+                filtered = tasks.filter(t =>
+                    t.dueDate && new Date(t.dueDate) < now && t.status !== "Done"
+                );
+            }
+
             const list = document.getElementById('tasks');
             list.innerHTML = '';
 
-            tasks.forEach(task => {
+            filtered.forEach(task => {
                 const li = document.createElement('li');
 
                 const categoryName = task.categoryName ?? "No category";
 
+                const isOverdue =
+                    task.dueDate &&
+                    new Date(task.dueDate) < now &&
+                    task.status !== "Done";
+
+                li.className = isOverdue ? "overdue" : "";
+
                 li.textContent =
-                    `${task.id}: ${task.title} [${task.priority}] (${task.status}) - ${categoryName} `;
+                    `${task.id}: ${task.title} [${task.priority}] (${task.status}) - ${categoryName}` +
+                    (task.dueDate ? ` | Due: ${new Date(task.dueDate).toLocaleString()}` : '');
 
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
@@ -191,7 +218,8 @@
                             description: task.description,
                             status: newStatus,
                             priority: newPriority,
-                            categoryId: newCategoryId ? parseInt(newCategoryId) : null
+                            categoryId: newCategoryId ? parseInt(newCategoryId) : null,
+                            dueDate: task.dueDate ?? null
                         })
                     });
 
@@ -214,6 +242,7 @@
         const status = document.getElementById('taskStatus').value;
         const priority = document.getElementById('taskPriority').value;
         const categoryId = document.getElementById('taskCategory').value;
+        const dueDate = document.getElementById('taskDueDate').value;
 
         if (!title) return;
 
@@ -224,11 +253,13 @@
                 title,
                 status,
                 priority,
-                categoryId: categoryId ? parseInt(categoryId) : null
+                categoryId: categoryId ? parseInt(categoryId) : null,
+                dueDate: dueDate ? new Date(dueDate).toISOString() : null
             })
         });
 
         document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDueDate').value = '';
         loadTasks();
     });
 
@@ -252,6 +283,9 @@
         .addEventListener('change', loadTasks);
 
     document.getElementById('sortTasks')
+        .addEventListener('change', loadTasks);
+
+    document.getElementById('filterOverdue')
         .addEventListener('change', loadTasks);
 
     loadCategories();

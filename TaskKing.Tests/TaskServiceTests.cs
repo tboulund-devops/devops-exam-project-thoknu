@@ -528,5 +528,114 @@ namespace TaskKing.Tests.Services
 
             Assert.Single(result);
         }
+        
+        // ---------------- OVERDUE ----------------
+        
+        [Fact]
+        public async Task GetOverdueTasks_ReturnsOverdueTasks()
+        {
+            var options = new DbContextOptionsBuilder<TaskKingDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            await using var context = new TaskKingDbContext(options);
+            var service = new TaskService(context);
+
+            context.TaskItems.Add(new TaskItem
+            {
+                Title = "Overdue",
+                DueDate = DateTime.UtcNow.AddDays(-2),
+                Status = TaskItem.StatusValues.Todo
+            });
+
+            await context.SaveChangesAsync();
+
+            var result = await service.GetOverdueTasks();
+
+            Assert.Single(result);
+            Assert.Equal("Overdue", result.First().Title);
+        }
+        
+        [Fact]
+        public async Task GetOverdueTasks_ExcludesCompletedTasks()
+        {
+            var options = new DbContextOptionsBuilder<TaskKingDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            await using var context = new TaskKingDbContext(options);
+            var service = new TaskService(context);
+
+            context.TaskItems.Add(new TaskItem
+            {
+                Title = "Done but overdue",
+                DueDate = DateTime.UtcNow.AddDays(-5),
+                Status = TaskItem.StatusValues.Done
+            });
+
+            await context.SaveChangesAsync();
+
+            var result = await service.GetOverdueTasks();
+
+            Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetOverdueTasks_ExcludesFutureTasks()
+        {
+            var options = new DbContextOptionsBuilder<TaskKingDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            await using var context = new TaskKingDbContext(options);
+            var service = new TaskService(context);
+
+            context.TaskItems.Add(new TaskItem
+            {
+                Title = "Future task",
+                DueDate = DateTime.UtcNow.AddDays(5),
+                Status = TaskItem.StatusValues.Todo
+            });
+
+            await context.SaveChangesAsync();
+
+            var result = await service.GetOverdueTasks();
+
+            Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetOverdueTasks_ReturnsOrderedByDueDate()
+        {
+            var options = new DbContextOptionsBuilder<TaskKingDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            await using var context = new TaskKingDbContext(options);
+            var service = new TaskService(context);
+
+            context.TaskItems.AddRange(
+                new TaskItem
+                {
+                    Title = "Old",
+                    DueDate = DateTime.UtcNow.AddDays(-10),
+                    Status = TaskItem.StatusValues.Todo
+                },
+                new TaskItem
+                {
+                    Title = "Newer",
+                    DueDate = DateTime.UtcNow.AddDays(-1),
+                    Status = TaskItem.StatusValues.Todo
+                }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = (await service.GetOverdueTasks()).ToList();
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal("Old", result[0].Title);
+            Assert.Equal("Newer", result[1].Title);
+        }
     }
 }
