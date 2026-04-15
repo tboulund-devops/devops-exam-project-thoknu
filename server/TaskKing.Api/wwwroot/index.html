@@ -199,9 +199,12 @@
 
             paged.forEach(task => {
                 const li = document.createElement('li');
-                li.setAttribute('data-task-id', task.id);
-                li.setAttribute('data-test', 'task-item');
-                li.setAttribute('data-title', task.title);
+
+                const title = String(task.title ?? '').trim();
+
+                li.dataset.taskId = task.id;
+                li.dataset.test = 'task-item';
+                li.dataset.title = title;
 
                 const categoryName = task.categoryName ?? "No category";
 
