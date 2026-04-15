@@ -127,7 +127,7 @@ jobs:
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
-            docker compose -f compose.staging.yaml down -v
+            docker compose -f compose.staging.yaml down
             docker compose -f compose.staging.yaml pull
             docker compose -f compose.staging.yaml up -d --force-recreate --remove-orphans
             
@@ -201,6 +201,6 @@ jobs:
 
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u thoknu --password-stdin
 
-            docker compose -f compose.prod.yaml down -v
+            docker compose -f compose.prod.yaml down
             docker compose -f compose.prod.yaml pull
             docker compose -f compose.prod.yaml up -d --force-recreate --remove-orphans
