@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Text.Json.Serialization;
 
 namespace TaskKing.Api.Models;
 
@@ -18,6 +18,7 @@ public class TaskItem
         public const string High = "High";
     }
     
+    [JsonIgnore]
     public int Id { get; set; }
     
     public string Title { get; set; } = string.Empty;

@@ -25,7 +25,8 @@ public class CommentService
         var comment = new Comment
         {
             TaskItemId = taskId,
-            Content = content
+            Content = content,
+            CreatedAt = DateTime.UtcNow
         };
 
         _context.Comments.Add(comment);
@@ -37,6 +38,7 @@ public class CommentService
     public async Task<List<Comment>> GetCommentsForTask(int taskId)
     {
         return await _context.Comments
+            .AsNoTracking()
             .Where(c => c.TaskItemId == taskId)
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
