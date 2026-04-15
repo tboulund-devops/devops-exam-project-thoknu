@@ -1,0 +1,2 @@
+﻿ALTER TABLE TaskItems
+    ADD COLUMN DueDate DATETIME NULL;

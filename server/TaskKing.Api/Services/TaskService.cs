@@ -108,6 +108,7 @@ namespace TaskKing.Api.Services
             task.Description = updated.Description;
             task.Status = updated.Status;
             task.Priority = updated.Priority;
+            task.DueDate = updated.DueDate;
             task.CategoryId = updated.CategoryId;
 
             await _context.SaveChangesAsync();
@@ -128,6 +129,20 @@ namespace TaskKing.Api.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+        
+        public async Task<IEnumerable<TaskItem>> GetOverdueTasks()
+        {
+            var now = DateTime.UtcNow;
+
+            return await _context.TaskItems
+                .Where(t =>
+                    t.DueDate.HasValue &&
+                    t.DueDate.Value < now &&
+                    t.Status != TaskItem.StatusValues.Done)
+                .Include(t => t.Category)
+                .OrderBy(t => t.DueDate)
+                .ToListAsync();
         }
     }
 }

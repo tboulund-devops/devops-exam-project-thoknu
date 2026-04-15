@@ -30,6 +30,8 @@ public class TaskItem
     
     public string Priority { get; set; } = PriorityValues.Medium;
     
+    public DateTime? DueDate { get; set; }
+    
     public int? CategoryId { get; set; }
     
     public Category? Category { get; set; }
