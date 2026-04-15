@@ -39,7 +39,7 @@ namespace TaskKing.Api.Services
         }
 
         public async Task<IEnumerable<TaskItem>> GetAllTasks()
-            => await _context.TaskItems.OrderBy(t => t.Id).ToListAsync();
+            => await _context.TaskItems.OrderByDescending(t => t.Id).ToListAsync();
         
         public async Task<IEnumerable<TaskItem>> GetAllTasksSorted(string? sortBy, int page = 1, int pageSize = 50)
         {
@@ -52,8 +52,8 @@ namespace TaskKing.Api.Services
             var ordered = sortBy?.ToLower() switch
             {
                 "priority" => tasks.OrderByDescending(t => PriorityRank(t.Priority)).ThenBy(t => t.Id),
-                "created" => tasks.OrderBy(t => t.CreatedAt),
-                _ => tasks.OrderBy(t => t.Id)
+                "created" => tasks.OrderByDescending(t => t.CreatedAt),
+                _ => tasks.OrderByDescending(t => t.Id)
             };
 
             return ordered
@@ -86,7 +86,7 @@ namespace TaskKing.Api.Services
         public async Task<IEnumerable<TaskItem>> GetAllTasksByStatus(string status)
             => await _context.TaskItems
                 .Where(t => t.Status == status)
-                .OrderBy(t => t.Id)
+                .OrderByDescending(t => t.Id)
                 .ToListAsync();
 
         public async Task<TaskItem?> UpdateTask(int id, TaskItem updated)
@@ -155,7 +155,7 @@ namespace TaskKing.Api.Services
             {
                 return await _context.TaskItems
                     .Include(t => t.Category)
-                    .OrderBy(t => t.Id)
+                    .OrderByDescending(t => t.Id)
                     .ToListAsync();
             }
 
@@ -164,7 +164,7 @@ namespace TaskKing.Api.Services
                 .Where(t =>
                     EF.Functions.Like(t.Title, $"%{query}%") ||
                     (t.Description != null && EF.Functions.Like(t.Description, $"%{query}%")))
-                .OrderBy(t => t.Id)
+                .OrderByDescending(t => t.Id)
                 .ToListAsync();
         }
     }
