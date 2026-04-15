@@ -327,6 +327,8 @@
 
         document.getElementById('taskTitle').value = '';
         document.getElementById('taskDueDate').value = '';
+        document.getElementById('searchBox').value = ''; 
+        currentPage = 1;
 
         await loadTasks();
     });
