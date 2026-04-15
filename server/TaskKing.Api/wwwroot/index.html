@@ -302,6 +302,35 @@
         loadTasks();
     });
 
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById('taskTitle').value.trim();
+        const status = document.getElementById('taskStatus').value;
+        const priority = document.getElementById('taskPriority').value;
+        const categoryId = document.getElementById('taskCategory').value;
+        const dueDate = document.getElementById('taskDueDate').value;
+
+        if (!title) return;
+
+        await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title,
+                status,
+                priority,
+                categoryId: categoryId ? parseInt(categoryId) : null,
+                dueDate: dueDate ? new Date(dueDate).toISOString() : null
+            })
+        });
+
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDueDate').value = '';
+
+        await loadTasks();
+    });
+
     loadCategories();
     loadTasks();
 </script>
