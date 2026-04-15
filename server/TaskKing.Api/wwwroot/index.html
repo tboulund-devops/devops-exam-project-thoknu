@@ -17,6 +17,16 @@
 
 <h1>Task King</h1>
 
+<div style="margin-bottom: 20px;">
+    <h3>Categories</h3>
+    <ul id="categories"></ul>
+
+    <form id="categoryForm">
+        <input type="text" id="categoryName" placeholder="Category name" required />
+        <button type="submit">Add Category</button>
+    </form>
+</div>
+
 <div style="margin-bottom: 10px;">
     <select id="filterStatus">
         <option value="">All</option>
@@ -76,6 +86,50 @@
             categories.map(c =>
                 `<option value="${c.id}">${c.name}</option>`
             ).join('');
+
+        const list = document.getElementById('categories');
+        list.innerHTML = '';
+
+        categories.forEach(cat => {
+            const li = document.createElement('li');
+
+            li.textContent = `${cat.id}: ${cat.name} `;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = "Edit";
+            editBtn.style.marginLeft = "5px";
+
+            editBtn.onclick = async () => {
+                const newName = prompt("New category name:", cat.name);
+                if (!newName) return;
+
+                await fetch(`/api/categories/${cat.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName })
+                });
+
+                loadCategories();
+                loadTasks();
+            };
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = "Delete";
+            delBtn.style.marginLeft = "5px";
+
+            delBtn.onclick = async () => {
+                await fetch(`/api/categories/${cat.id}`, {
+                    method: 'DELETE'
+                });
+
+                loadCategories();
+                loadTasks();
+            };
+
+            li.appendChild(editBtn);
+            li.appendChild(delBtn);
+            list.appendChild(li);
+        });
     }
 
     async function loadTasks() {
@@ -176,6 +230,22 @@
 
         document.getElementById('taskTitle').value = '';
         loadTasks();
+    });
+
+    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('categoryName').value.trim();
+        if (!name) return;
+
+        await fetch('/api/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+
+        document.getElementById('categoryName').value = '';
+        loadCategories();
     });
 
     document.getElementById('filterStatus')

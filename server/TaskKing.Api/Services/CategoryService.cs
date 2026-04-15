@@ -25,6 +25,35 @@ public class CategoryService
 
         return category;
     }
+    
+    public async Task<Category?> Update(int id, Category updated)
+    {
+        var category = await _context.Categories.FindAsync(id);
+
+        if (category == null)
+            return null;
+
+        if (string.IsNullOrWhiteSpace(updated.Name))
+            return null;
+
+        category.Name = updated.Name;
+
+        await _context.SaveChangesAsync();
+        return category;
+    }
+    
+    public async Task<bool> Delete(int id)
+    {
+        var category = await _context.Categories.FindAsync(id);
+
+        if (category == null)
+            return false;
+
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
 
     public async Task<List<Category>> GetAll()
         => await _context.Categories

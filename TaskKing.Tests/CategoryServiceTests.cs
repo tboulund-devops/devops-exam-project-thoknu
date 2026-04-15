@@ -40,6 +40,106 @@ namespace TaskKing.Tests.Services
                 service.Create(new Category { Name = "" })
             );
         }
+        
+        [Fact]
+        public async Task Update_ShouldUpdateCategory_WhenValid()
+        {
+            var context = GetDbContext();
+            var service = new CategoryService(context);
+
+            var category = new Category { Name = "Old" };
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
+
+            var updated = new Category { Name = "New" };
+
+            var result = await service.Update(category.Id, updated);
+
+            Assert.NotNull(result);
+            Assert.Equal("New", result!.Name);
+        }
+
+        [Fact]
+        public async Task Update_ShouldReturnNull_WhenNotFound()
+        {
+            var context = GetDbContext();
+            var service = new CategoryService(context);
+
+            var result = await service.Update(999, new Category { Name = "Test" });
+
+            Assert.Null(result);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task Update_ShouldReturnNull_WhenNameInvalid(string name)
+        {
+            var context = GetDbContext();
+            var service = new CategoryService(context);
+
+            var category = new Category { Name = "Valid" };
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
+
+            var result = await service.Update(category.Id, new Category { Name = name });
+
+            Assert.Null(result);
+        }
+        
+        [Fact]
+        public async Task Delete_ShouldRemoveCategory_WhenExists()
+        {
+            var context = GetDbContext();
+            var service = new CategoryService(context);
+
+            var category = new Category { Name = "Delete me" };
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
+
+            var result = await service.Delete(category.Id);
+
+            Assert.True(result);
+            Assert.DoesNotContain(context.Categories, c => c.Id == category.Id);
+        }
+
+        [Fact]
+        public async Task Delete_ShouldReturnFalse_WhenNotFound()
+        {
+            var context = GetDbContext();
+            var service = new CategoryService(context);
+
+            var result = await service.Delete(999);
+
+            Assert.False(result);
+        }
+        
+        [Fact]
+        public async Task Delete_ShouldSetTaskCategoryIdToNull()
+        {
+            var context = GetDbContext();
+            var service = new CategoryService(context);
+
+            var category = new Category { Name = "Cat" };
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
+
+            var task = new TaskItem
+            {
+                Title = "Task",
+                CategoryId = category.Id
+            };
+
+            context.TaskItems.Add(task);
+            await context.SaveChangesAsync();
+
+            await service.Delete(category.Id);
+
+            var dbTask = await context.TaskItems.FindAsync(task.Id);
+
+            Assert.NotNull(dbTask);
+            Assert.Null(dbTask!.CategoryId);
+        }
 
         [Fact]
         public async Task GetAll_ShouldReturnCategoriesOrdered()
