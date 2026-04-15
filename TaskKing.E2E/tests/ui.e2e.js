@@ -9,7 +9,6 @@ test("create and delete task", async t => {
 
     const input = Selector('#taskTitle');
     const form = Selector('#taskForm');
-    const list = Selector('#tasks');
 
     const title = `ui-task-${Date.now()}`;
 
@@ -17,11 +16,13 @@ test("create and delete task", async t => {
         .typeText(input, title)
         .click(form.find('button'));
 
-    const createdTask = list.find('li').withText(title);
+    const createdTask = Selector('[data-test="task-item"]').withText(title);
+
     await t.expect(createdTask.exists).ok({ timeout: 5000 });
 
-    await t
-        .click(createdTask.find('button').withText('Delete'));
+    const deleteBtn = createdTask.find('button').withText('Delete');
+
+    await t.click(deleteBtn);
 
     await t.expect(createdTask.exists).notOk({ timeout: 5000 });
 });
