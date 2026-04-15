@@ -125,7 +125,7 @@ Easter vacation - nothing planned.
 
 ---
 
-### Week 17** I will not get to this week
+### Week 17** I will not get to this
 - Feature 1: Tag system (many-to-many with tasks)
 - Feature 2: Filter by tags
 

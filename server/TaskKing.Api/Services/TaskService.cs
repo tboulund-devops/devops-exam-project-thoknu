@@ -41,7 +41,7 @@ namespace TaskKing.Api.Services
         public async Task<IEnumerable<TaskItem>> GetAllTasks()
             => await _context.TaskItems.OrderBy(t => t.Id).ToListAsync();
         
-        public async Task<IEnumerable<TaskItem>> GetAllTasksSorted(string? sortBy)
+        public async Task<IEnumerable<TaskItem>> GetAllTasksSorted(string? sortBy, int page = 1, int pageSize = 50)
         {
             var query = _context.TaskItems
                 .Include(t => t.Category)
@@ -49,12 +49,16 @@ namespace TaskKing.Api.Services
 
             var tasks = await query.ToListAsync();
 
-            return sortBy?.ToLower() switch
+            var ordered = sortBy?.ToLower() switch
             {
                 "priority" => tasks.OrderByDescending(t => PriorityRank(t.Priority)).ThenBy(t => t.Id),
                 "created" => tasks.OrderBy(t => t.CreatedAt),
                 _ => tasks.OrderBy(t => t.Id)
             };
+
+            return ordered
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
         }
         
         public async Task<TaskItem> CreateTask(TaskItem task)
@@ -142,6 +146,25 @@ namespace TaskKing.Api.Services
                     t.Status != TaskItem.StatusValues.Done)
                 .Include(t => t.Category)
                 .OrderBy(t => t.DueDate)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<TaskItem>> SearchTasks(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return await _context.TaskItems
+                    .Include(t => t.Category)
+                    .OrderBy(t => t.Id)
+                    .ToListAsync();
+
+            query = query.ToLower();
+
+            return await _context.TaskItems
+                .Include(t => t.Category)
+                .Where(t =>
+                    t.Title.ToLower().Contains(query) ||
+                    (t.Description != null && t.Description.ToLower().Contains(query)))
+                .OrderBy(t => t.Id)
                 .ToListAsync();
         }
     }

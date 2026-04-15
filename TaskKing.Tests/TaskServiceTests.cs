@@ -637,5 +637,80 @@ namespace TaskKing.Tests.Services
             Assert.Equal("Old", result[0].Title);
             Assert.Equal("Newer", result[1].Title);
         }
+        
+        // ---------------- SEARCH ----------------
+        
+        [Fact]
+        public async Task SearchTasks_ShouldReturnMatchingTitle()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            context.TaskItems.AddRange(
+                new TaskItem { Title = "Write documentation" },
+                new TaskItem { Title = "Fix bug in API" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = await service.SearchTasks("documentation");
+
+            Assert.Single(result);
+            Assert.Contains(result, t => t.Title == "Write documentation");
+        }
+        
+        [Fact]
+        public async Task SearchTasks_ShouldMatchDescription()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            context.TaskItems.AddRange(
+                new TaskItem { Title = "Task A", Description = "database migration issue" },
+                new TaskItem { Title = "Task B", Description = "UI work" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = await service.SearchTasks("migration");
+
+            Assert.Single(result);
+            Assert.Equal("Task A", result.First().Title);
+        }
+        
+        [Fact]
+        public async Task SearchTasks_ShouldBeCaseInsensitive()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            context.TaskItems.Add(
+                new TaskItem { Title = "Fix Authentication Flow" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = await service.SearchTasks("authentication");
+
+            Assert.Single(result);
+        }
+        
+        [Fact]
+        public async Task SearchTasks_ShouldReturnAll_WhenQueryIsEmpty()
+        {
+            var context = GetDbContext();
+            var service = new TaskService(context);
+
+            context.TaskItems.AddRange(
+                new TaskItem { Title = "A" },
+                new TaskItem { Title = "B" }
+            );
+
+            await context.SaveChangesAsync();
+
+            var result = await service.SearchTasks("");
+
+            Assert.Equal(2, result.Count());
+        }
     }
 }

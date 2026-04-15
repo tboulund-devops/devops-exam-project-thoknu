@@ -17,9 +17,12 @@ namespace TaskKing.Api.Controllers
         }
         
         [HttpGet]
-        public async Task<IEnumerable<TaskDto>> GetTasks([FromQuery] string? sort)
+        public async Task<IEnumerable<TaskDto>> GetTasks(
+            [FromQuery] string? sort,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var tasks = await _service.GetAllTasksSorted(sort);
+            var tasks = await _service.GetAllTasksSorted(sort, page, pageSize);
 
             return tasks.Select(t => new TaskDto
             {
@@ -162,6 +165,24 @@ namespace TaskKing.Api.Controllers
                 Priority = t.Priority,
                 DueDate = t.DueDate,
                 CategoryId = t.CategoryId
+            });
+        }
+        
+        [HttpGet("search")]
+        public async Task<IEnumerable<TaskDto>> Search([FromQuery] string q)
+        {
+            var tasks = await _service.SearchTasks(q);
+
+            return tasks.Select(t => new TaskDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                CreatedAt = t.CreatedAt,
+                Status = t.Status,
+                Priority = t.Priority,
+                CategoryId = t.CategoryId,
+                CategoryName = t.Category?.Name
             });
         }
     }
