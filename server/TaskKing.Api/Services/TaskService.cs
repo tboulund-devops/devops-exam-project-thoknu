@@ -152,18 +152,18 @@ namespace TaskKing.Api.Services
         public async Task<IEnumerable<TaskItem>> SearchTasks(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
+            {
                 return await _context.TaskItems
                     .Include(t => t.Category)
                     .OrderBy(t => t.Id)
                     .ToListAsync();
-
-            query = query.ToLower();
+            }
 
             return await _context.TaskItems
                 .Include(t => t.Category)
                 .Where(t =>
-                    t.Title.ToLower().Contains(query) ||
-                    (t.Description != null && t.Description.ToLower().Contains(query)))
+                    EF.Functions.Like(t.Title, $"%{query}%") ||
+                    (t.Description != null && EF.Functions.Like(t.Description, $"%{query}%")))
                 .OrderBy(t => t.Id)
                 .ToListAsync();
         }
