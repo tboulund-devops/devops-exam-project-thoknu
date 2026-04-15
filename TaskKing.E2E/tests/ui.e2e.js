@@ -16,7 +16,7 @@ test("create and delete task", async t => {
         .typeText(input, title)
         .click(form.find('button'));
 
-    const createdTask = Selector('[data-test="task-item"]').withText(title);
+    const createdTask = Selector('[data-test="task-item"]').withAttribute('data-title', title);
 
     await t.expect(createdTask.exists).ok({ timeout: 5000 });
 
