@@ -35,4 +35,6 @@ public class TaskItem
     public int? CategoryId { get; set; }
     
     public Category? Category { get; set; }
+    
+    public List<Comment> Comments { get; set; } = new();
 }
