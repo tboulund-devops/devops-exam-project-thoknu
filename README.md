@@ -46,10 +46,9 @@ Presentation → API → Service Layer → Database
 2. Run unit tests
 3. Build Docker image
 4. Push image to GHCR
-5. Deploy to staging (dev branch)
+5. Deploy to staging/production (dev/main branch)
 6. Run E2E test(s) (TestCafe)
 7. Run load test(s) (k6)
-8. Deploy to production (main branch)
 
 ---
 
@@ -98,37 +97,36 @@ Winter vacation - nothing planned.
 ---
 
 ### Week 12
+- Feature 1: Update categories
+- Feature 2: Delete categories
+
+---
+
+### Week 13
 - Feature 1: Due dates
 - Feature 2: Show overdue tasks
 
 ---
 
-### Week 13
+### Week 14
 - Feature 1: Comments on tasks
 - Feature 2: List comments per task
 
 ---
 
-### Week 14
+### Week 15
 Easter vacation - nothing planned.
 
 ---
 
-### Week 15
+### Week 16
 - Feature 1: Search tasks (by title/description)
 - Feature 2: Pagination for task list
 
 ---
 
-### Week 16
+### Week 17** I will not get to this week
 - Feature 1: Tag system (many-to-many with tasks)
 - Feature 2: Filter by tags
-
----
-
-### Week 17
-- Feature 1: Activity log (track changes to tasks)**
-- Feature 2: Export tasks (CSV)**
-- **Not sure if I get to this week.**
 
 ---
