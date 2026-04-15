@@ -43,6 +43,8 @@
         condition: service_completed_successfully
     environment:
       ConnectionStrings__DefaultConnection: "Host=mariadb;Port=3306;Database=taskking;Username=taskking;Password=taskking"
+      FEATURE_SEARCH: "false"
+      FEATURE_PAGINATION: "true"
     ports:
       - "8000:8080"
     restart: unless-stopped

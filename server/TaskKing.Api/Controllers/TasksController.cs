@@ -10,10 +10,15 @@ namespace TaskKing.Api.Controllers
     public class TasksController : ControllerBase
     {
         private readonly TaskService _service;
+        private readonly bool _enableSearch;
+        private readonly bool _enablePagination;
 
         public TasksController(TaskService service)
         {
             _service = service;
+            
+            _enableSearch = Environment.GetEnvironmentVariable("FEATURE_SEARCH") == "true";
+            _enablePagination = Environment.GetEnvironmentVariable("FEATURE_PAGINATION") == "true";
         }
         
         [HttpGet]
@@ -22,7 +27,11 @@ namespace TaskKing.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var tasks = await _service.GetAllTasksSorted(sort, page, pageSize);
+            var tasks = await _service.GetAllTasksSorted(
+                sort,
+                _enablePagination ? page : 1,
+                _enablePagination ? pageSize : int.MaxValue
+            );
 
             return tasks.Select(t => new TaskDto
             {
@@ -171,6 +180,9 @@ namespace TaskKing.Api.Controllers
         [HttpGet("search")]
         public async Task<IEnumerable<TaskDto>> Search([FromQuery] string q)
         {
+            if (!_enableSearch)
+                return Enumerable.Empty<TaskDto>();
+            
             var tasks = await _service.SearchTasks(q);
 
             return tasks.Select(t => new TaskDto
