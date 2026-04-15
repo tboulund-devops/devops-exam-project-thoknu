@@ -26,7 +26,7 @@
         condition: service_healthy
     volumes:
       - ./db/migrations:/flyway/sql
-    command: migrate
+    command: -connectRetries=60 migrate
     environment:
       FLYWAY_URL: jdbc:mariadb://mariadb:3306/taskking
       FLYWAY_USER: taskking
